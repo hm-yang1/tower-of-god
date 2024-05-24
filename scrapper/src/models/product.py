@@ -26,4 +26,5 @@ class Product:
         if des.isspace(): return
         if self.description == '':
             self.description += des
+            return
         self.description = self.description + "\n" + des
