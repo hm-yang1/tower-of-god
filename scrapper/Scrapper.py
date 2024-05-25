@@ -9,7 +9,7 @@ class Scrapper:
         self.firefox_options = webdriver.FirefoxOptions()
         self.firefox_options.add_argument("-headless")
         self.firefox_options.set_preference("browser.privatebrowsing.autostart", True)
-        self.names: list
+        self.names: list[str]
     
     # *_name keeps track list of product names to prevent repeated scrapping of the same product
     def reset_names(self):

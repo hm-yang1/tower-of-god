@@ -1,4 +1,7 @@
 from datetime import date
+from django.db import models
+
+# TODO: change product to django model
 class Product:
     def __init__(self, name):
         self.name = name

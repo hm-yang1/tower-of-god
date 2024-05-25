@@ -1,14 +1,10 @@
-from selenium import webdriver
-from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
+from multiprocessing.pool import ThreadPool
 from typing import Callable
 from Scrapper import Scrapper
-from models.product import Product
+from api.models.product import Product
 
 class rtings_scrapper(Scrapper):
-    # TODO:
-    # think about running the parse_recommendation() concurrently
     def __init__(self):
         super().__init__()
         self.website = 'https://www.rtings.com'
@@ -59,11 +55,11 @@ class rtings_scrapper(Scrapper):
         )
         print(recommendation_urls)
 
-        # Go to each recommedation page and get the recommended products
-        # TODO: parse_recommendation should be ran concurrently to improve performance
-        for str in recommendation_urls:
-            products.extend(self.parse_recommendation(str))
-        
+        # Go to each recommedation page and get the recommended products, runs concurrently
+        results = ThreadPool().map(self.parse_recommendations, recommendation_urls)
+        for result in results:
+            products.extend(result) 
+                  
         for product in products:
             print(product.name + '\n')
             print(product.description)
@@ -96,8 +92,9 @@ class rtings_scrapper(Scrapper):
         self.end(driver)
         return urls
     
-    def parse_recommendation(self, url:str) -> list[Product]:
+    def parse_recommendations(self, url:str) -> list[Product]:
         # driver go recommendation page
+        # Wanted to add concurrency here but seems to crash local machine
         driver = self.start(url)
         recommendations = driver.find_elements(By.CLASS_NAME, 'recommendation_page-block')
         products = []
@@ -111,14 +108,13 @@ class rtings_scrapper(Scrapper):
                 continue
             else: 
                 self.insert_name(name)
-                
+            
+            # Instantiate new product
             product = Product(name)
-            print(name)
             
             # Get link of review
             p_url = p_name.find_element(By.TAG_NAME, 'a').get_attribute('href')
             product.add_review(p_url)
-            print(product.reviews)
             
             # Get recommendation reasons
             summary_block = recommendation.find_element(By.CLASS_NAME, 'e-rich_content')
@@ -127,6 +123,7 @@ class rtings_scrapper(Scrapper):
                 product.add_description(paragraphs.text)
             
             products.append(self.parse_review(product, p_url))
+        
         self.end(driver)
         return products
     
@@ -137,7 +134,6 @@ class rtings_scrapper(Scrapper):
         texts = driver.find_element(By.CLASS_NAME, 'product_page-header').find_element(By.CLASS_NAME, 'e-rich_content').find_elements(By.TAG_NAME, 'p')
         for text in texts:
             product.add_description(text.text)
-        print(product.description)
         
         # Get pros and cons
         sections = driver.find_elements(By.CLASS_NAME, 'usage_card-summary-body')
@@ -153,18 +149,16 @@ class rtings_scrapper(Scrapper):
         # remove duplicates
         product.pros = list(set(product.pros)) #might not be the best way
         product.cons = list(set(product.cons))
-        print(product.pros)
-        print(product.cons)
         
         self.end(driver)
         return product
 
 def main():
     scrapper = rtings_scrapper()
-    # scrapper.get_earbuds()
+    scrapper.get_earbuds()
     # scrapper.get_headphones()
     # scrapper.get_keyboards()
-    scrapper.get_mice()
+    # scrapper.get_mice()
     # scrapper.get_monitors()
     # scrapper.get_laptops()
     # scrapper.get_television()
