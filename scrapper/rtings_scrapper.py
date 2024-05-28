@@ -1,8 +1,12 @@
+import os
+import django
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
+django.setup()
 from selenium.webdriver.common.by import By
 from multiprocessing.pool import ThreadPool
 from typing import Callable
 from Scrapper import Scrapper
-from api.models.product import Product
+from api.models import Product
 
 class rtings_scrapper(Scrapper):
     def __init__(self):
@@ -14,7 +18,7 @@ class rtings_scrapper(Scrapper):
         products = self.get_products(url, lambda x: 'earbuds' in x)
         return products
     
-    def get_headphones(self):
+    def get_headphones(self) -> list[Product]:
         url = 'https://www.rtings.com/headphones/reviews/best'
         products = self.get_products(url, lambda x: not('earbuds' or 'airpods') in x)
         return products
@@ -61,10 +65,7 @@ class rtings_scrapper(Scrapper):
             products.extend(result) 
                   
         for product in products:
-            print(product.name + '\n')
-            print(product.description)
-            print(product.pros)
-            print(product.cons)
+            print(product.__str__())
         
         return products
     
@@ -110,7 +111,7 @@ class rtings_scrapper(Scrapper):
                 self.insert_name(name)
             
             # Instantiate new product
-            product = Product(name)
+            product = Product(name = name)
             
             # Get link of review
             p_url = p_name.find_element(By.TAG_NAME, 'a').get_attribute('href')
@@ -154,13 +155,15 @@ class rtings_scrapper(Scrapper):
         return product
 
 def main():
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
+    # settings.configure()
     scrapper = rtings_scrapper()
-    scrapper.get_earbuds()
+    # scrapper.get_earbuds()
     # scrapper.get_headphones()
     # scrapper.get_keyboards()
     # scrapper.get_mice()
     # scrapper.get_monitors()
-    # scrapper.get_laptops()
+    scrapper.get_laptops()
     # scrapper.get_television()
     
 if __name__ == "__main__":
