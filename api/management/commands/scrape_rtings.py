@@ -1,7 +1,6 @@
 from typing import Any
 from django.core.management.base import BaseCommand
 from scrapper.rtings_scrapper import rtings_scrapper
-from . import scrape_website
 
 class Command(BaseCommand):
     help = "Scrape rtings.com data and save data to psql DB"

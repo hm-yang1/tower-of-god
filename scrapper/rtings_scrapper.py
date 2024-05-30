@@ -3,7 +3,7 @@ import django
 from selenium.webdriver.common.by import By
 from multiprocessing.pool import ThreadPool
 from typing import Callable
-from . import Scrapper
+from .Scrapper import Scrapper
 
 class rtings_scrapper(Scrapper):
     def __new__(cls):
