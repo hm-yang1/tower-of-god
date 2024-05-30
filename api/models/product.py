@@ -6,15 +6,15 @@ class Product(models.Model):
     
     # name of product has to be unique
     name = models.CharField(max_length=255, unique=True)
-    brand = models.CharField(max_length=255, blank=True)
+    brand = models.CharField(max_length=255)
     
     # Image reference to aws s3 bucket, needs testing
-    img = models.ImageField(upload_to='products/')
+    img = models.ImageField(upload_to='products/', null=True)
     
-    MSRP = models.FloatField(blank=True)
-    release_date = models.DateField(blank=True)
+    MSRP = models.FloatField(blank=True, null=True)
+    release_date = models.DateField(blank=True, null=True)
     description = models.TextField(blank=True)
-    score = models.IntegerField(blank=True)
+    score = models.IntegerField(blank=True, null=True)
     pros = models.JSONField(default=list, blank=True)
     cons = models.JSONField(default=list, blank=True)
     reviews = models.JSONField(default=list, blank=True)
@@ -24,14 +24,17 @@ class Product(models.Model):
     class Meta:
         # Set this class as abstract
         abstract = True
-        # pass
     
     def __str__(self) -> str:
         result = self.name
+        result += '\n' + self.brand
         result += '\n' + self.description
         result += '\n' + str(self.pros)
         result += '\n' + str(self.cons)
         return result
+    
+    def add_brand(self, name: str):
+        self.brand = name
     
     def add_review(self, url: str):
         self.reviews.append(url)
