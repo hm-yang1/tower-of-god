@@ -6,7 +6,7 @@ from django.utils.encoding import force_bytes
 from django.core.mail import send_mail
 from django.urls import reverse
 from rest_framework.views import APIView
-from rest_framework.authentication import BasicAuthentication, SessionAuthentication
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.response import Response
 from rest_framework import permissions, status
 from ..serial.user_serializer import UserRegisterSerializer, UserSerializer
@@ -43,6 +43,7 @@ class LoginView(APIView):
         return Response({'Incorrect login credentials'}, status=status.HTTP_401_UNAUTHORIZED)
     
 class LogoutView(APIView):
+    authentication_classes = [SessionAuthentication]
     permission_classes = [permissions.IsAuthenticated]
     
     def post(self, request):
