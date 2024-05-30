@@ -5,7 +5,7 @@ class UserRegisterSerializer(serializers.Serializer):
     username = serializers.EmailField()
     password = serializers.CharField()
     
-    def create(self, validated_data):
+    def create(self, validated_data) -> User:
         user = User(
             username = validated_data['username'],
         )
@@ -13,10 +13,12 @@ class UserRegisterSerializer(serializers.Serializer):
         user.save()
         return user
     
-    def update(self, instance:User, validated_data):
+    def update(self, instance:User, validated_data) -> User:
         instance.username = validated_data.get('username', instance.username)
         if 'password' in validated_data:
             instance.set_password(validated_data['password'])
+        else:
+            return None
         instance.save()
         return instance
  
