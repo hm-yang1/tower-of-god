@@ -3,9 +3,15 @@ import django
 from selenium.webdriver.common.by import By
 from multiprocessing.pool import ThreadPool
 from typing import Callable
-from .Scrapper import Scrapper
+from . import Scrapper
 
 class rtings_scrapper(Scrapper):
+    def __new__(cls):
+        # Overriding default creation of new instance, no point for more than 1 instance
+        if not hasattr(cls, 'instance'):
+            cls.instance = super(rtings_scrapper, cls).__new__(cls)
+        return cls.instance
+
     def __init__(self):
         super().__init__()
         self.website = 'https://www.rtings.com'
