@@ -1,3 +1,8 @@
+import os
+import django
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
+django.setup()
+import api.models as model
 from selenium import webdriver
 from bisect import insort
 from bisect import bisect_left
@@ -5,6 +10,17 @@ from bisect import bisect_left
 class Scrapper:
     # A parent class for all scrappers
     # set options for the webdriver and some helpful functions
+    
+    # Django models for the products. 
+    # Scrapper will return lists of Django models
+    categories = {
+        'earbuds': model.Earbuds,
+        'headphones': model.Headphones,
+        'keyboard': model.Keyboard,
+        'laptop': model.Laptop,
+        'mouse': model.Mouse,
+    }
+        
     def __init__(self):
         self.firefox_options = webdriver.FirefoxOptions()
         self.firefox_options.add_argument("-headless")
