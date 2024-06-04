@@ -1,7 +1,9 @@
+from django.contrib.postgres.search import SearchQuery, SearchVector, SearchRank
 from rest_framework.permissions import AllowAny
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
+from rapidfuzz import process, fuzz, utils
 from ..models.product import Product
 from ..models.earbuds import Earbuds
 from ..models.headphones import Headphones
@@ -18,39 +20,57 @@ from ..serial.product_serializers import (
     PhoneSerializer,
 )
 
-# Views for products
-# Done with view sets to abstract common logic such as the search and filter fields
+# Viewset for all products
 class ProductViewSet(ReadOnlyModelViewSet):
+    # Categories of products
+    # placed here for convience, not sure if this is the most correct place to put this
+    categories = {
+            'earbuds': [Earbuds, EarbudSerializer, []],
+            'headphones': [Headphones, HeadphoneSerializer, []],
+            'keyboard': [Keyboard, KeyboardSerializer, []],
+            'laptop': [Laptop, LaptopSerializer, []],
+            'mouse': [Mouse, MouseSerializer, []],
+        }
+    
     filter_backends = [SearchFilter, DjangoFilterBackend]
     
-    # Once fill in product info, extend and override in child views
-    filterset_fields = ['brand']
-    search_fields = ['name', 'brand', 'pros']
-    
+    # After determining category, extend filter fields
+    filterset_fields = ['brand', 'MSRP', 'release_date']
+        
+    # Determines catergory through fuzzy search. Performs full text search in the product fields
     def get_queryset(self):
-        queryset = self.queryset
+        # Get search query from http request
+        search_string = str(self.request.query_params.get('q', None))
+        print(search_string)
+        
+        # Fuzzy search to determine category
+        choices = list(self.categories.keys())
+        
+        # Scorers set to default ratio for now
+        print(process.extractOne(search_string, choices, scorer=fuzz.ratio, processor= utils.default_process))
+        category = process.extractOne(search_string, choices, scorer=fuzz.ratio, processor= utils.default_process)[0]
+        
+        # Remove category from search_string
+        words = search_string.split()
+        closest_match = process.extractOne(category, words, scorer=fuzz.ratio)[0]
+        words.remove(closest_match)
+        search_string = ' '.join(words)
+        
+        # doing setup after determining category
+        cat_info = self.categories.get(category)
+        model = cat_info[0]
+        self.serializer_class = cat_info[1]
+        self.filterset_fields.extend(cat_info[2])
+        
+        
+        # Full text search
+        print(search_string)
+        query = SearchQuery(search_string)
+        
+        # Vectors determine fields to search for and weight of each field
+        vector = SearchVector('name', 'brand', 'pros', weight = 'A')
+        vector += SearchVector('description', weight = "C") 
+        
+        # Full text SearchRank with SearchQeury and SearchVectors
+        queryset = model.objects.annotate(rank = SearchRank(vector, query)).order_by("-rank")
         return queryset
-
-class EarbudsViewSet(ProductViewSet):
-    queryset = Earbuds.objects.all()
-    serializer_class = EarbudSerializer
-
-class HeadphonesViewSet(ProductViewSet):
-    queryset = Headphones.objects.all()
-    serializer_class = HeadphoneSerializer
-
-class KeyboardViewSet(ProductViewSet):
-    queryset = Keyboard.objects.all()
-    serializer_class = KeyboardSerializer
-
-class LaptopViewSet(ProductViewSet):
-    queryset = Laptop.objects.all()
-    serializer_class = LaptopSerializer
-
-class MouseViewSet(ProductViewSet):
-    queryset = Mouse.objects.all()
-    serializer_class = MouseSerializer
-
-class PhoneViewSet(ProductViewSet):
-    queryset = Phone.objects.all()
-    serializer_class = PhoneSerializer

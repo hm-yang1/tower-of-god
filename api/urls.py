@@ -3,21 +3,11 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views.user_views import LoginView, LogoutView, RegisterView
 from .views.category_view import CategoryView
-from .views.product_views import (
-    EarbudsViewSet, 
-    HeadphonesViewSet,
-    KeyboardViewSet,
-    LaptopViewSet,
-    MouseViewSet,
-)
+from .views.product_views import ProductViewSet
 
 # router to add product view sets
 router = DefaultRouter()
-router.register(r'earbuds', EarbudsViewSet)
-router.register(r'headphones', HeadphonesViewSet)
-router.register(r'keyboard', KeyboardViewSet)
-router.register(r'laptop', LaptopViewSet)
-router.register(r'mouse', MouseViewSet)
+router.register(r'products', ProductViewSet, basename='product')
 
 urlpatterns = [
     # Authentication Urls
@@ -27,5 +17,5 @@ urlpatterns = [
     
     # Get URLs
     path('categories/', CategoryView.as_view()),
-    path('products/', include(router.urls))
+    path('', include(router.urls))
 ]
