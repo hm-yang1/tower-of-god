@@ -19,6 +19,7 @@ class Scrapper:
         'keyboard': model.Keyboard,
         'laptop': model.Laptop,
         'mouse': model.Mouse,
+        'phone': model.Phone,
     }
         
     def __init__(self):

@@ -1,7 +1,8 @@
 from django.contrib.postgres.search import SearchQuery, SearchVector, SearchRank
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from rest_framework.filters import SearchFilter
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from django_filters.rest_framework import DjangoFilterBackend
 from rapidfuzz import process, fuzz, utils
 from ..models.product import Product
@@ -31,6 +32,9 @@ class ProductViewSet(ReadOnlyModelViewSet):
             'laptop': [Laptop, LaptopSerializer, []],
             'mouse': [Mouse, MouseSerializer, []],
         }
+    
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     
     filter_backends = [SearchFilter, DjangoFilterBackend]
     
