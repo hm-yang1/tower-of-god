@@ -102,9 +102,17 @@ SIMPLE_JWT = {
 
 AUTH_USER_MODEL = 'api.User'
 
+# CORS settings
+
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
     # 'http://127.0.0.1:5173',
+]
+
+CORS_ALLOW_HEADERS = [
+    'refresh-token',  # Add the refresh-token header for jwt access token
+    'Authorization',
+    'Content-Type',
 ]
 
 CORS_ALLOW_CREDENTIALS = True
