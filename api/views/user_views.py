@@ -9,7 +9,6 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import permissions, status
 from ..serial.user_serializer import UserRegisterSerializer, UserSerializer
 
-@method_decorator(csrf_exempt, name='dispatch')
 class RegisterView(APIView):
     permission_classes = [permissions.AllowAny]
     
@@ -23,7 +22,6 @@ class RegisterView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response({'error': 'Invalid data'}, serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-# @method_decorator(csrf_exempt, name='dispatch')
 class LoginView(APIView):
     permission_classes = [permissions.AllowAny]
                 
