@@ -29,8 +29,8 @@ class Laptop(Product):
         string += '\n' + str(self.battery_life)
         string += '\n' + str(self.weight)
         string += '\n' + str(self.screen_size)
-        string += '\n' + self.screen_resolution
-        string += '\n' + self.processor
+        string += '\n' + str(self.screen_resolution)
+        string += '\n' + str(self.processor)
         
         return string
     

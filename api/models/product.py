@@ -32,6 +32,7 @@ class Product(models.Model):
         result += '\n' + self.description
         result += '\n' + str(self.pros)
         result += '\n' + str(self.cons)
+        result += '\n' + str(self.reviews)
         return result
     
     def add_brand(self, name: str):
@@ -57,3 +58,8 @@ class Product(models.Model):
         if self.price is not None:
             return
         self.price = price
+        
+    # def remove_duplicates(self):
+    #     self.pros = list(set(self.pros))
+    #     self.cons = list(set(self.cons))
+    #     self.reviews = list(set(self.reviews))

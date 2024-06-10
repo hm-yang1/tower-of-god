@@ -14,7 +14,6 @@ from ..models.mouse import Mouse
 from ..models.phone import Phone
 from ..serial.product_serializers import (
     EarbudSerializer, 
-    HeadphoneSerializer, 
     KeyboardSerializer, 
     LaptopSerializer, 
     MouseSerializer, 
@@ -26,11 +25,11 @@ class ProductViewSet(ReadOnlyModelViewSet):
     # Categories of products
     # placed here for convience, not sure if this is the most correct place to put this
     categories = {
-            'earbuds': [Earbuds, EarbudSerializer, []],
-            'headphones': [Headphones, HeadphoneSerializer, []],
+            'earphones': [Earbuds, EarbudSerializer, []],
             'keyboard': [Keyboard, KeyboardSerializer, []],
             'laptop': [Laptop, LaptopSerializer, []],
             'mouse': [Mouse, MouseSerializer, []],
+            'phone': [Phone, PhoneSerializer, []]
         }
     
     # authentication_classes = [JWTAuthentication]
