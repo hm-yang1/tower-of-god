@@ -1,6 +1,8 @@
 from django.db import models
 from . import Product
 
+# TO BE DELETED, MERGED MODEL WITH EARBUDS
+
 class Headphones(Product):
     # Model fields
     wireless = models.BooleanField(null=True, )

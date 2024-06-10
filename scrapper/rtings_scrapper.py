@@ -7,7 +7,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.relative_locator import locate_with
 from multiprocessing.pool import ThreadPool
 from rapidfuzz import fuzz
-from typing import Callable
 from Scrapper import Scrapper
 
 class rtings_scrapper(Scrapper):
@@ -25,7 +24,6 @@ class rtings_scrapper(Scrapper):
         # return list of methods to call to get data for various categories
         return [
             self.get_earbuds,
-            self.get_headphones,
             self.get_keyboards,
             self.get_laptops,
             self.get_mice,
@@ -37,60 +35,46 @@ class rtings_scrapper(Scrapper):
     def get_earbuds(self) -> list:
         category = 'earbuds'
         url = 'https://www.rtings.com/headphones/reviews/best'
-        products = self.get_products(
-            category, 
-            url, 
-            lambda x: 'earbuds' in x or 'airpods' in x or 'neckband' in x)
-        return products
-    
-    def get_headphones(self) -> list:
-        category = 'headphones'
-        url = 'https://www.rtings.com/headphones/reviews/best'
-        products = self.get_products(
-            category, 
-            url, 
-            lambda x: not('earbuds' in x) and not('airpods' in x)  and not('neckband'in x))
+        products = self.get_products(category, url) 
         return products
     
     def get_keyboards(self) -> list:
         category = 'keyboard'
         url = 'https://www.rtings.com/keyboard/reviews/best'
-        products = self.get_products(category, url, lambda x: True)
+        products = self.get_products(category, url)
         return products
     
     def get_laptops(self) -> list:
         category = 'laptop'
         url = 'https://www.rtings.com/laptop/reviews/best'
-        products = self.get_products(category, url, lambda x: True)
+        products = self.get_products(category, url)
         return products
             
     def get_mice(self) -> list:
         category = 'mouse'
         url = 'https://www.rtings.com/mouse/reviews/best'
-        products = self.get_products(category, url, lambda x: True)
+        products = self.get_products(category, url)
         return products
         
     def get_monitors(self) -> list:
         category = 'monitor'
         url = 'https://www.rtings.com/monitor/reviews/best'
-        products = self.get_products(category, url, lambda x: True)
+        products = self.get_products(category, url)
         return products
     
     def get_television(self) -> list:
         category = 'television'
         url = 'https://www.rtings.com/tv/reviews/best'
-        products = self.get_products(category, url, lambda x: True)
+        products = self.get_products(category, url)
         return products
     
-    def get_products(self, category:str, url:str, filter_func:Callable) -> list:
+    def get_products(self, category:str, url:str) -> list:
         # General get products function
         products = []
         self.reset_names()
         
         # Get all the recommendation urls fron the best * page
-        recommendation_urls = list(
-            filter(filter_func, self.parse_best_page(url))
-        )
+        recommendation_urls = self.parse_best_page(url)
         print(recommendation_urls)
 
         # Go to each recommedation page and get the recommended products, runs concurrently
@@ -223,6 +207,11 @@ class rtings_scrapper(Scrapper):
     
     # Below are methods that parse additionaly info for each category
     def parse_earbuds(self, product, driver):
+        # Get type
+        type_card = self.get_card(driver, '283')
+        type = type_card.find_element(By.CLASS_NAME, 'test_value.is-word').find_element(By.CLASS_NAME, 'test_result_value.e-test_result.review-value-score').text
+        product.add_type(type == 'In-ear')
+        
         # Get wireless
         bluetooth_card = driver.find_element(locate_with(By.CLASS_NAME, 'test_group-header').below({By.ID: 'test_1941'}))
         bluetooth_score = float(bluetooth_card.find_element(By.CLASS_NAME, 'e-score_box-value').text)
@@ -243,10 +232,6 @@ class rtings_scrapper(Scrapper):
         anc = anc_card.find_element(By.CLASS_NAME, 'test_value.is-word').find_element(By.CLASS_NAME, 'test_result_value.e-test_result.review-value-score').text
         product.add_anc(anc == 'Yes')
         
-        return product
-        
-    def parse_headphones(self, product, driver):
-        product = self.parse_earbuds(product, driver)
         return product
     
     def parse_keyboard(self, product, driver):
@@ -344,16 +329,12 @@ class rtings_scrapper(Scrapper):
         
         return driver.find_element(locate_with(By.CLASS_NAME, 'test_group-content').below({By.ID: test_str}))
 
-        
-        
-
 def main():
     scrapper = rtings_scrapper()
-    # scrapper.get_earbuds()
-    # scrapper.get_headphones()
+    scrapper.get_earbuds()
     # scrapper.get_keyboards()
     # scrapper.get_mice()
-    scrapper.get_laptops()
+    # scrapper.get_laptops()
     
     # scrapper.reset_names()
     # url = 'https://www.rtings.com/mouse/reviews/razer/viper-v3-pro'

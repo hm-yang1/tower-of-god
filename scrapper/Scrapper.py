@@ -17,7 +17,6 @@ class Scrapper:
     # Scrapper will return lists of Django models
     categories = {
         'earbuds': model.Earbuds,
-        'headphones': model.Headphones,
         'keyboard': model.Keyboard,
         'laptop': model.Laptop,
         'mouse': model.Mouse,
