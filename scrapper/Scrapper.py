@@ -1,5 +1,7 @@
 import os
+import sys
 import django
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
 django.setup()
 import api.models as model
@@ -39,9 +41,9 @@ class Scrapper:
         i = bisect_left(self.names, name)
         return i != len(self.names) and self.names[i] == name
         
-    def start(self, url:str = None) -> webdriver:
+    def start(self, url: str = None) -> webdriver:
         driver = webdriver.Firefox(self.firefox_options)
-        # driver.set_window_size(1980, 1080)
+        driver.set_window_size(1980, 1080)
         driver.get(url)
         # driver.implicitly_wait(1)
         return driver

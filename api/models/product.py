@@ -11,7 +11,7 @@ class Product(models.Model):
     # Image reference to aws s3 bucket, needs testing
     img = models.ImageField(upload_to='products/', null=True)
     
-    MSRP = models.FloatField(blank=True, null=True)
+    price = models.FloatField(blank=True, null=True)
     release_date = models.DateField(blank=True, null=True)
     description = models.TextField(blank=True)
     score = models.IntegerField(blank=True, null=True)
@@ -28,6 +28,7 @@ class Product(models.Model):
     def __str__(self) -> str:
         result = self.name
         result += '\n' + self.brand
+        # result += '\n' + 'Price: ' + self.price
         result += '\n' + self.description
         result += '\n' + str(self.pros)
         result += '\n' + str(self.cons)
@@ -51,3 +52,8 @@ class Product(models.Model):
             self.description += des
             return
         self.description = self.description + "\n" + des
+    
+    def add_price(self, price: float):
+        if self.price is not None:
+            return
+        self.price = price

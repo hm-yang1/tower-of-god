@@ -33,8 +33,8 @@ class ProductViewSet(ReadOnlyModelViewSet):
             'mouse': [Mouse, MouseSerializer, []],
         }
     
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
     
     filter_backends = [SearchFilter, DjangoFilterBackend]
     
@@ -65,7 +65,6 @@ class ProductViewSet(ReadOnlyModelViewSet):
         model = cat_info[0]
         self.serializer_class = cat_info[1]
         self.filterset_fields.extend(cat_info[2])
-        
         
         # Full text search
         print(search_string)

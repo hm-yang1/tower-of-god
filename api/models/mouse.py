@@ -3,29 +3,36 @@ from . import Product
 
 class Mouse(Product):
     # Model fields
-    wireless = models.BooleanField(null=True)
-    polling_rate = models.IntegerField(null=True)
-    
-    # Nullable field for battery life if wireless
-    battery_life = models.FloatField(null=True, blank=True)
-    
+    wireless = models.BooleanField(null=True)    
     buttons_count = models.IntegerField(null=True)
     dpi = models.IntegerField(null=True)
     weight = models.FloatField(null=True)
-    ergonomics = models.CharField(max_length=100, null=True) 
     
-    def add_product(self):
-        if not Mouse.objects.filter(name = self.name).exists():
-            self.save()
-            return
+    def add_wireless(self, wireless: bool):
+        self.wireless = wireless
         
-        database_input = Mouse.objects.filter.first()
-        if self.reviews[0] in database_input.reviews:
+    def add_buttons(self, buttons: int):
+        if self.buttons_count is not None:
             return
+        self.buttons_count = buttons
+    
+    def add_dpi(self, dpi: int):
+        if self.dpi is not None:
+            return
+        self.dpi = dpi
         
-        database_input.add_review(self.reviews[0])
-        database_input.add_description(self.description)
-        database_input.pros.extend(self.pros)
-        database_input.cons.extend(self.cons)
-        database_input.save()
-        return
+    def add_weight(self, weight: float, ounces:bool):
+        if self.weight is not None:
+            return
+        if ounces:
+            self.weight = weight * 28.35
+        else:
+            self.weight = weight
+    
+    def __str__(self) -> str:
+        string = super().__str__()
+        string += '\n' + str(self.wireless)
+        string += '\n' + str(self.buttons_count)
+        string += '\n' + str(self.dpi)
+        string += '\n' + str(self.weight)
+        return string

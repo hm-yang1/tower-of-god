@@ -4,9 +4,21 @@ from . import Product
 class Keyboard(Product):
     # Model fields
     wireless = models.BooleanField(null=True, )
-    
-    # Nullable field for battery life if wireless
-    battery_life = models.FloatField(null=True, blank=True)
-    
-    size = models.CharField(null=True, max_length=10, choices=[('60%', '60%'), ('68%', '68%'), ('70%', '70%'), ('80%', '80%'), ('100%', '100%')])
+    size = models.IntegerField(null=True, blank=True)
     key_switches = models.CharField(null=True, max_length=50)
+
+    def add_wireless(self, wireless: bool):
+        self.wireless = wireless
+    
+    def add_size(self, size: int):
+        self.size = size
+    
+    def add_switches(self, key_switches: str):
+        self.key_switches = key_switches
+    
+    def __str__(self) -> str:
+        string = super().__str__()
+        string += '\n' + str(self.wireless)
+        string += '\n' + str(self.size)
+        string += '\n' + str(self.key_switches)
+        return string
