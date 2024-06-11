@@ -193,8 +193,6 @@ class rtings_scrapper(Scrapper):
         match category:
             case 'earbuds':
                 product = self.parse_earbuds(product, driver)
-            case 'headphones':
-                product = self.parse_headphones(product, driver)
             case 'keyboard':
                 product = self.parse_keyboard(product, driver)
             case 'laptop':
@@ -273,18 +271,24 @@ class rtings_scrapper(Scrapper):
         match = re.search(r'\(([\d.]+) kg\)', weight)
         if match:
             weight_in_kg = float(match.group(1))
-            product.add_weight(weight_in_kg)
+            product.add_weight(weight_in_kg, False)
             
         # Get resolution
         resolution_card = self.get_card(driver, '5195')
         resolution = resolution_card.find_element(By.CLASS_NAME, 'test_value.is-word').find_element(By.CLASS_NAME, 'test_result_value.e-test_result.review-value-score.ld-paywall').text
-        product.add_screen_resolution(resolution)
+        resolution_string = resolution.split()
+        product.add_screen_resolution(int(resolution_string[0]), int(resolution_string[2]))
         
         # Get processor
         processor_card = self.get_card(driver, '6096')
         brand = processor_card.find_element(By.CLASS_NAME, 'test_value.is-word').find_element(By.CLASS_NAME, 'test_result_value.e-test_result.review-value-score.ld-paywall').text
         model = processor_card.find_element(By.CLASS_NAME, 'test_value.is-freeform').find_element(By.CLASS_NAME, 'test_result_value.e-test_result.review-value-score.ld-paywall').text
         product.add_processor(brand + ' ' + model)
+        
+        # Get OS
+        os_card = self.get_card(driver, '6044')
+        os = os_card.find_element(By.CLASS_NAME, 'test_value.is-word').find_element(By.CLASS_NAME, 'test_result_value.e-test_result.review-value-score').text
+        product.add_os(os)
         
         return product
     
@@ -331,10 +335,10 @@ class rtings_scrapper(Scrapper):
 
 def main():
     scrapper = rtings_scrapper()
-    scrapper.get_earbuds()
-    # scrapper.get_keyboards()
-    # scrapper.get_mice()
-    # scrapper.get_laptops()
+    # scrapper.get_earbuds()
+    scrapper.get_keyboards()
+    scrapper.get_mice()
+    scrapper.get_laptops()
     
     # scrapper.reset_names()
     # url = 'https://www.rtings.com/mouse/reviews/razer/viper-v3-pro'
