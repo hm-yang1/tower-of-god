@@ -16,6 +16,7 @@ class pcmag_scrapper(Scrapper):
     def __init__(self):
         super().__init__()
         self.website = 'https://www.pcmag.com'
+        self.website_name = 'pcmag.com'
     
     def get_methods(self) -> list:
         # return list of methods to call to get data for various categories
@@ -28,6 +29,7 @@ class pcmag_scrapper(Scrapper):
             
             # self.get_monitors,
             # self.get_television,
+            # self.get_speakers,
         ]
     
     def get_earbuds(self) -> list:
@@ -132,17 +134,21 @@ class pcmag_scrapper(Scrapper):
             paragraphs = recommendation.find_elements(By.TAG_NAME, 'p')
             for paragraph in paragraphs:
                 product.add_description(paragraph.text)
+            
+            # Get specs
+            # Getting specs here instead of in review cause some reviews have missing specs tables
+            specs = self.parse_specs_table(recommendation)
                 
             # Get review url
             url = recommendation.find_element(By.CLASS_NAME, 'mt-2.inline-block.font-semibold.text-red-400.underline').get_attribute('href')
             product.add_review(url)
             
-            products.append(self.parse_review(product, category, url))
+            products.append(self.parse_review(product, specs, category, url))
             
         self.end(driver)
         return products
     
-    def parse_review(self, product, category: str, url:str = None):
+    def parse_review(self, product, specs:dict, category: str, url:str = None):
         driver = self.start(url)
         
         # Get summary
@@ -164,21 +170,132 @@ class pcmag_scrapper(Scrapper):
         article = driver.find_element(By.ID, 'article')
         paragraphs = article.find_elements(By.TAG_NAME, 'p')
         
-        # Articles kinda long, might consider randomly choosing paragraphs
-        for paragraph in paragraphs[:-5]:
-            product.add_description(paragraph.text)
+        # Articles kinda long, choosing 1st and last paragraphs
+        product.add_description(paragraphs[0].text)
+        product.add_description(paragraphs[-6].text)
         
-        #TODO Add scraping for detailed information for specific category of product
+        #Additional information for specific category of product
+        match category:
+            case 'earbuds':
+                product = self.parse_earbuds(product, specs)
+            case 'keyboard':
+                product = self.parse_keyboard(product, specs)
+            case 'laptop':
+                product = self.parse_laptop(product, specs)
+            case 'mouse':
+                product = self.parse_mouse(product, specs)
+            case 'phone':
+                product = self.parse_phone(product, specs)
+        
         self.end(driver)
         return product
+    
+    def parse_earbuds(self, product, specs:dict):
+        product.add_type(specs['Type'] == 'In-Canal')
+        product.add_wireless(specs['Wireless'] == 'True')
+        product.add_anc(specs['Active Noise Cancellation'] == 'True')
+        
+        # Unable to scrape battery
+        return product
+    
+    def parse_keyboard(self, product, specs:dict):
+        # Parsing wireless
+        wireless_string = specs['Interface']
+        wireless_keywords = ['Wireless', 'Bluetooth']            
+        product.add_wireless(any(keyword in wireless_string for keyword in wireless_keywords))
+        
+        product.add_size(int(specs['Number of Keys']))
+        product.add_switches(specs['Key Switch Type'])
+        return product
+    
+    def parse_laptop(self, product, specs:dict):
+        product.add_processor(specs['Processor'])
+        product.add_screen_size(float(specs['Screen Size'].split()[0]))
+        product.add_weight(float(specs['Weight'].split()[0]), True)
+        product.add_os(specs['Operating System'])
+        
+        # Parsing screen resolution
+        resolution_string = specs['Native Display Resolution'].split()
+        product.add_screen_resolution(int(resolution_string[0].replace(',', '')), int(resolution_string[2].replace(',','')))
+        
+        # Parsing battery life
+        battery_string = specs['Tested Battery Life (Hours:Minutes)'].split(':')
+        product.add_battery(float(battery_string[0]) + float(battery_string[1])/60, self.website_name)
+        return product
+    
+    def parse_mouse(self, product, specs:dict):
+        # Parsing wireless
+        wireless_string = specs['Interface']
+        wireless_keywords = ['Wireless', 'Bluetooth']            
+        product.add_wireless(any(keyword in wireless_string for keyword in wireless_keywords))
+        
+        product.add_buttons(int(specs['Number of Buttons']))
+        product.add_dpi(int(specs['Sensor Maximum Resolution'].split()[0]))
+        product.add_weight(float(specs['Weight'].split()[0]), True)
+        return product
+    
+    def parse_phone(self, product, specs:dict):
+        product.add_os(specs['Operating System'])
+        product.add_processor(specs['CPU'])
+        product.add_size(specs['Screen Size'])
+        
+        # Parsing screen resolution
+        resolution_string = specs['Screen Resolution'].split()
+        product.add_screen_resolution(
+            int(resolution_string[0].replace(',','')), 
+            int(resolution_string[2].replace(',',''))
+        )
+        
+        # Parsing battery life
+        product.add_battery(
+            float(re.findall(r'\d+', specs['Battery Life (As Tested)'])[0]),
+            self.website_name
+        )
+        return product
+    
+    def parse_specs_table(self, element) -> dict[str, str]:
+        # Expand specs table
+        element.find_element(By.LINK_TEXT, 'ALL SPECS').click()
+        
+        # Get specs table
+        table = element.find_element(By.TAG_NAME, 'table')
+        rows = table.find_elements(By.TAG_NAME, 'tr')
+        
+        # format specs table into a dict
+        specs = {}
+        for row in rows:
+            key_and_value = row.find_elements(By.TAG_NAME, 'td')
+            if len(key_and_value) < 2: continue
+            key = key_and_value[0].text
+            value = key_and_value[1].text
+            if value:
+                specs[key] = value
+                continue
+            
+            # Check if thing is check mark or cross
+            check = len(key_and_value[1].find_elements(By.XPATH, "//svg[@data-icon='check']")) > 0
+            if check:
+                specs[key] = 'True'
+            else:
+                specs[key] = 'False'
+        return specs
 
 def main():
     scrapper = pcmag_scrapper()
+    # url = 'https://www.pcmag.com/picks/the-best-trackball-mice'
+    # driver = scrapper.start(url)
+    # element = driver.find_element(By.XPATH, "//div[@data-parent-group='roundup-product-card']")
+    # scrapper.parse_specs_table(element)
     # scrapper.get_earbuds()
     # scrapper.get_keyboards()
-    scrapper.get_laptops()
+    # scrapper.get_laptops()
     # scrapper.get_mice()
-    # scrapper.get_phones()
+    scrapper.get_phones()
+    
+    # Models not implemented yet
+    # scrapper.get_television()
+    # scrapper.get_monitors()
+    # scrapper.get_speakers()
     
 if __name__ == "__main__":
     main()
