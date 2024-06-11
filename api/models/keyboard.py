@@ -1,3 +1,4 @@
+import math
 from django.db import models
 from . import Product
 
@@ -11,7 +12,11 @@ class Keyboard(Product):
         self.wireless = wireless
     
     def add_size(self, size: int):
-        self.size = size
+        if size > 100:
+            self.size = 100
+            return
+        
+        self.size = math.ceil(size/10) * 10
     
     def add_switches(self, key_switches: str):
         self.key_switches = key_switches

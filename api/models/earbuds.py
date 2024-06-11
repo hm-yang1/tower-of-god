@@ -32,8 +32,8 @@ class Earbuds(Product):
     def __str__(self) -> str:
         string = super().__str__()
         string += '\n' + 'Type: ' + self.earphone_type
-        string += '\n' + str(self.wireless)
-        string += '\n' + str(self.battery_life)
-        string += '\n' + str(self.active_noise_cancellation)
+        string += '\n' + 'Wireless: ' + str(self.wireless)
+        string += '\n' + 'Battery life: ' + str(self.battery_life)
+        string += '\n' + 'ANC: '  + str(self.active_noise_cancellation)
         return string
     

@@ -19,8 +19,8 @@ class Phone(Product):
     def add_size(self, size: float):
         self.size = size
     
-    def add_screen_resolution(self, screen_resolution: str):
-        self.screen_resolution = screen_resolution
+    def add_screen_resolution(self, width:int, height:int):
+        self.screen_resolution = str(width) + ' x ' + str(height)
     
     def add_processor(self, processor: str):
         self.processor = processor
