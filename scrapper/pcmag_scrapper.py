@@ -91,10 +91,12 @@ class pcmag_scrapper(Scrapper):
 
         # Go to each recommedation page and get the recommended products, runs concurrently
         curried_parse_recommendation = lambda x: self.parse_recommendations(category, x)
-        results = ThreadPool().map(curried_parse_recommendation, recommendation_urls)
+        pool = ThreadPool()
+        results = pool.map(curried_parse_recommendation, recommendation_urls)
         for result in results:
             products.extend(result) 
-                  
+        pool.close()
+        
         for product in products:
             print(product.__str__())
         
@@ -237,7 +239,7 @@ class pcmag_scrapper(Scrapper):
     def parse_phone(self, product, specs:dict):
         product.add_os(specs['Operating System'])
         product.add_processor(specs['CPU'])
-        product.add_size(specs['Screen Size'])
+        product.add_screen_size(specs['Screen Size'])
         
         # Parsing screen resolution
         resolution_string = specs['Screen Resolution'].split()

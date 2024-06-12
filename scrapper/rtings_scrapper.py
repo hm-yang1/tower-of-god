@@ -79,9 +79,11 @@ class rtings_scrapper(Scrapper):
 
         # Go to each recommedation page and get the recommended products, runs concurrently
         curried_parse_recommendation = lambda x: self.parse_recommendations(category, x)
-        results = ThreadPool().map(curried_parse_recommendation, recommendation_urls)
+        pool = ThreadPool()
+        results = pool.map(curried_parse_recommendation, recommendation_urls)
         for result in results:
             products.extend(result) 
+        pool.close()
                   
         for product in products:
             print(product.__str__())
