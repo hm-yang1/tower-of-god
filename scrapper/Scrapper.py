@@ -42,7 +42,7 @@ class Scrapper:
         
     def start(self, url: str = None) -> webdriver:
         driver = webdriver.Firefox(self.firefox_options)
-        driver.set_window_size(1980, 1080)
+        driver.set_window_size(1920, 1080)
         driver.get(url)
         # driver.implicitly_wait(1)
         return driver
