@@ -16,7 +16,7 @@ class Phone(Product):
     def add_os(self, os: str):
         self.os_version = os
     
-    def add_size(self, size: float):
+    def add_screen_size(self, size: float):
         self.size = size
     
     def add_screen_resolution(self, width:int, height:int):
