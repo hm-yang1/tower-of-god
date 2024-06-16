@@ -65,6 +65,13 @@ class Scrapper:
     def check_name(self, name: str) -> bool:
         i = bisect_left(self.names, name)
         return i != len(self.names) and self.names[i] == name
+    
+    def filter(self, strings: list[str], include:bool=True):
+        # Helper function to create filter to filter recommendation urls
+        if include:
+            return lambda x: any(string in x for string in strings)
+        else:
+            return lambda x: not any(string in x for string in strings)
         
     def start(self, url: str = None) -> webdriver:
         driver = webdriver.Firefox(self.firefox_options)

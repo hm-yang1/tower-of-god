@@ -373,10 +373,6 @@ class techradar_scrapper(Scrapper):
             specs[key] = value
         
         return specs
-    
-    def filter(self, strings: list[str]):
-        # Helper function to create filter to filter recommendation urls
-        return lambda x: any(string in x for string in strings)
 
 def main():
     scrapper = techradar_scrapper()
