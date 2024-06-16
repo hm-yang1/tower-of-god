@@ -12,6 +12,7 @@ class Product(models.Model):
     
     # Image reference to aws s3 bucket, needs testing
     img = models.ImageField(upload_to='products/', null=True)
+    img_url = models.URLField(max_length=200, null=True, blank=True)
     
     price = models.FloatField(blank=True, null=True)
     review_date = models.DateField(blank=True, null=True)
@@ -33,6 +34,7 @@ class Product(models.Model):
         result += '\n' + self.brand
         result += '\n' + 'Price: ' + str(self.price)
         result += '\n' + 'Date: ' + str(self.review_date)
+        result += '\n' + str(self.img_url)
         result += '\n' + self.description
         result += '\n' + str(self.pros)
         result += '\n' + str(self.cons)
@@ -70,6 +72,9 @@ class Product(models.Model):
     def add_date(self, year:int, month:int, day:int):
         date = datetime.date(year, month, day)
         self.review_date = date
+    
+    def add_img_url(self, url:str):
+        self.img_url = url
         
     def get_name(self) -> str:
         return self.name
