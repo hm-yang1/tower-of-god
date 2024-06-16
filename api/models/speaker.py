@@ -18,3 +18,11 @@ class Speaker(Product):
     
     def add_speakerphone(self, speakerphone: bool):
         self.speakerphone = speakerphone
+    
+    def __str__(self) -> str:
+        string = super().__str__()
+        string += '\n' + 'Portable: ' + str(self.portable)
+        string += '\n' + 'Bluetooth: ' + str(self.bluetooth)
+        string += '\n' + 'Wifi: ' + str(self.wifi)
+        string += '\n' + 'Speakerphone: ' + str(self.speakerphone)
+        return string

@@ -1,4 +1,5 @@
 from datetime import date
+import datetime
 from django.db import models
 
 class Product(models.Model):
@@ -12,7 +13,7 @@ class Product(models.Model):
     img = models.ImageField(upload_to='products/', null=True)
     
     price = models.FloatField(blank=True, null=True)
-    release_date = models.DateField(blank=True, null=True)
+    review_date = models.DateField(blank=True, null=True)
     description = models.TextField(blank=True)
     score = models.IntegerField(blank=True, null=True)
     pros = models.JSONField(default=list, blank=True)
@@ -28,7 +29,8 @@ class Product(models.Model):
     def __str__(self) -> str:
         result = self.name
         result += '\n' + self.brand
-        # result += '\n' + 'Price: ' + self.price
+        result += '\n' + 'Price: ' + str(self.price)
+        result += '\n' + 'Date: ' + str(self.review_date)
         result += '\n' + self.description
         result += '\n' + str(self.pros)
         result += '\n' + str(self.cons)
@@ -59,7 +61,11 @@ class Product(models.Model):
             return
         self.price = price
         
-    # def remove_duplicates(self):
-    #     self.pros = list(set(self.pros))
-    #     self.cons = list(set(self.cons))
-    #     self.reviews = list(set(self.reviews))
+    def add_date(self, year:int, month:int, day:int):
+        date = datetime.date(year, month, day)
+        self.review_date = date
+        
+    def remove_duplicates(self):
+        self.pros = list(set(self.pros))
+        self.cons = list(set(self.cons))
+        self.reviews = list(set(self.reviews))

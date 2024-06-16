@@ -10,7 +10,10 @@ class Laptop(Product):
     processor = models.CharField(null=True, max_length=15)
     os_version = models.CharField(null=True, max_length=50)
     
-    def add_battery(self, battery: float, website: str):
+    def add_battery(self, battery: float, website: str, direct:bool = False):
+        if direct:
+            self.battery_life.append(website)
+            return
         self.battery_life.append(str(battery) + ' hrs (' + website +')')
     
     def add_weight(self, weight: float, pounds: bool):

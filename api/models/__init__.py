@@ -6,3 +6,6 @@ from .keyboard import Keyboard
 from .laptop import Laptop
 from .mouse import Mouse
 from .phone import Phone
+from .television import Television
+from .monitor import Monitor
+from .speaker import Speaker

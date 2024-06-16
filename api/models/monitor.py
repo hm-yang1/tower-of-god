@@ -18,3 +18,11 @@ class Monitor(Product):
     
     def add_panel_type(self, panel_type: str):
         self.panel_type = panel_type
+        
+    def __str__(self) -> str:
+        string = super().__str__()
+        string += '\n' + 'Size: ' + str(self.screen_size)
+        string += '\n' + 'Resolution: ' + str(self.screen_resolution)
+        string += '\n' + 'Refresh rate: ' + str(self.refresh_rate)
+        string += '\n' + 'Type: ' + str(self.panel_type)
+        return string

@@ -6,6 +6,10 @@ class Television(Product):
     screen_resolution = models.CharField(null=True, max_length=15)
     panel_type = models.CharField(null=True, max_length=20)
     
+    def add_price(self, price: float):
+        if price > 100:
+            self.price = price
+    
     def add_screen_size(self, screen_size: int):
         self.screen_size = screen_size
     
@@ -14,3 +18,12 @@ class Television(Product):
     
     def add_panel_type(self, panel_type: str):
         self.panel_type = panel_type
+        
+    def __str__(self) -> str:
+        string = super().__str__()
+        string += '\n' + 'Size: ' + str(self.screen_size)
+        string += '\n' + 'Resolution: ' + str(self.screen_resolution)
+        string += '\n' + 'Type: ' + str(self.panel_type)
+        return string
+
+        

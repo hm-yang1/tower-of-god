@@ -10,7 +10,10 @@ class Phone(Product):
     screen_refresh_rate = models.IntegerField(null=True, blank=True)
     processor = models.CharField(null=True, max_length=15)
 
-    def add_battery(self, battery: float, website: str):
+    def add_battery(self, battery: float, website: str, direct:bool = False):
+        if direct:
+            self.battery_life.append(website)
+            return
         self.battery_life.append(str(battery) + ' hrs (' + website +')')
     
     def add_os(self, os: str):
