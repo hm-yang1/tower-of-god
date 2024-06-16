@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 import django
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
@@ -9,6 +10,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from bisect import insort
 from bisect import bisect_left
+from urllib.parse import unquote
 
 class Scrapper:
     # A parent class for all scrappers
@@ -38,7 +40,7 @@ class Scrapper:
         driver = self.start(amazon_url)
         
         # Need additional waiting cause amazon special, might block if too fast
-        driver.implicitly_wait(5)
+        time.sleep(5)
         
         # Get price of product
         search_results = driver.find_elements(By.CSS_SELECTOR, '[data-component-type="s-search-result"]')
@@ -51,6 +53,30 @@ class Scrapper:
                 price = possible_prices[0].text.replace(',','')
                 product.add_price(float(price))
                 break
+        
+        self.end(driver)
+        return product
+    
+    def get_img_url(self, product):
+        googe_img_url = 'https://www.google.com/search?q=' + product.name + '+official+product+image&udm=2'
+        
+        driver = self.start(googe_img_url)
+        
+        # Need additional waiting cause google also special, might block if too fast
+        time.sleep(5)
+        
+        # Get img url
+        img_wrapper = driver.find_element(By.XPATH, '//div[@jsname="dTDiAc"]')
+        driver.implicitly_wait(3)
+        img_wrapper.click()
+        raw_img_url = img_wrapper.find_element(By.TAG_NAME, 'a').get_attribute('href')
+        
+        # Parsing image url
+        encoded_img_url = raw_img_url.split('&imgurl=')[1].split('&')[0]
+        
+        # Decode url with urllib
+        url = unquote(encoded_img_url)
+        product.add_img_url(url)
         
         self.end(driver)
         return product
@@ -82,3 +108,13 @@ class Scrapper:
     
     def end(self, webdriver:webdriver):
         webdriver.quit()
+
+def main():
+    scrapper = Scrapper()
+    Product = scrapper.categories['monitor']
+    product = Product(name='AOC Q27G3XMN')
+    product = scrapper.get_img_url(product)
+    print(str(product))
+        
+if __name__ == "__main__":
+    main()
