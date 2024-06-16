@@ -1,5 +1,6 @@
 from datetime import date
 import datetime
+from email.policy import default
 from django.db import models
 
 class Product(models.Model):
@@ -19,6 +20,7 @@ class Product(models.Model):
     pros = models.JSONField(default=list, blank=True)
     cons = models.JSONField(default=list, blank=True)
     reviews = models.JSONField(default=list, blank=True)
+    reddit_comments = models.JSONField(default=list, blank=True)
     
     # Need to add function to fill in googable information, probably in scrapper
     
@@ -34,6 +36,7 @@ class Product(models.Model):
         result += '\n' + self.description
         result += '\n' + str(self.pros)
         result += '\n' + str(self.cons)
+        result += '\n' + str(self.reddit_comments) + str(len(self.reddit_comments))
         result += '\n' + str(self.reviews)
         return result
     
@@ -48,6 +51,9 @@ class Product(models.Model):
         
     def add_cons(self, con:str):
         self.cons.append(con)
+        
+    def add_reddit_comments(self, comments:list):
+        self.reddit_comments.extend(comments)
     
     def add_description(self, des:str):
         if des.isspace(): return
@@ -64,6 +70,9 @@ class Product(models.Model):
     def add_date(self, year:int, month:int, day:int):
         date = datetime.date(year, month, day)
         self.review_date = date
+        
+    def get_name(self) -> str:
+        return self.name
         
     def remove_duplicates(self):
         self.pros = list(set(self.pros))
