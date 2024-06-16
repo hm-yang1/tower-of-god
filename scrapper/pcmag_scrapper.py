@@ -26,10 +26,9 @@ class pcmag_scrapper(Scrapper):
             self.get_laptops,
             self.get_mice,
             self.get_phones,
-            
-            # self.get_monitors,
-            # self.get_television,
-            # self.get_speakers,
+            self.get_television,
+            self.get_monitors,
+            self.get_speakers,
         ]
     
     def get_earbuds(self) -> list:
@@ -153,6 +152,25 @@ class pcmag_scrapper(Scrapper):
     def parse_review(self, product, specs:dict, category: str, url:str = None):
         driver = self.start(url)
         
+        # Get review date
+        review_info = driver.find_element(By.ID, 'author-byline')
+        review_date_string = review_info.find_element(By.CSS_SELECTOR, '.md\\:ml-4').text
+        
+        # Get product price
+        product = self.get_price(product)
+        
+        # Date string might have some random words, need to eliminate
+        review_date = re.search(r'(\b\w+ \d{1,2}, \d{4}\b)', review_date_string).group(1).split()
+        
+        day = int(review_date[1][:-1])
+        year = int(review_date[2])
+        month_map = {
+            "January": 1, "February": 2, "March": 3, "April": 4,"May": 5, "June": 6,
+            "July": 7, "August": 8, "September": 9, "October": 10, "November": 11, "December": 12
+        }
+        month = int(month_map[review_date[0]])
+        product.add_date(year, month, day)
+        
         # Get summary
         summary = driver.find_element(By.CLASS_NAME, 'bottom-line.w-full.pt-6.text-base').text
         product.add_description(summary)
@@ -188,7 +206,13 @@ class pcmag_scrapper(Scrapper):
                 product = self.parse_mouse(product, specs)
             case 'phone':
                 product = self.parse_phone(product, specs)
-        
+            case 'television':
+                product = self.parse_television(product, specs)
+            case 'monitor':
+                product = self.parse_monitor(product, specs)
+            case 'speaker':
+                product = self.parse_speaker(product, specs)
+                
         self.end(driver)
         return product
     
@@ -255,6 +279,50 @@ class pcmag_scrapper(Scrapper):
         )
         return product
     
+    def parse_television(self, product, specs:dict):
+        # Get screen size
+        product.add_screen_size(int(specs['Screen Size'].split()[0]))
+        
+        # Get resolution
+        resolution_string = specs['Resolution'].split()
+        if len(resolution_string) > 1:
+            product.add_screen_resolution(
+                int(re.sub(r'\D', '', resolution_string[0])),
+                int(re.sub(r'\D', '', resolution_string[2]))
+            )
+        # Get panel type
+        product.add_panel_type(specs['Panel Type'])
+        
+        return product
+    
+    def parse_monitor(self, product, specs:dict):
+        # Get screen size
+        product.add_screen_size(int(float(specs['Panel Size (Corner-to-Corner)'].split()[0])))
+        
+        # Get resolution
+        resolution_string = specs['Native Resolution'].split()
+        if len(resolution_string) > 1:
+            product.add_screen_resolution(
+                int(re.sub(r'\D', '', resolution_string[0])),
+                int(re.sub(r'\D', '', resolution_string[2]))
+            )
+        
+        # Get panel type
+        product.add_panel_type(specs['Screen Technology'])
+        
+        # Get refresh rate
+        product.add_refresh_rate(int(specs['Pixel Refresh Rate'].split()[0]))
+        
+        return product
+    
+    def parse_speaker(self, product, specs:dict):
+        product.add_portable(specs['Portable'] == 'True')
+        product.add_bluetooth(specs['Bluetooth'] == 'True')
+        product.add_wifi(specs['Wi-Fi'] == 'True')
+        product.add_speakerphone(specs['Speakerphone'] == 'True')
+        
+        return product
+    
     def parse_specs_table(self, element) -> dict[str, str]:
         # Expand specs table
         element.find_element(By.LINK_TEXT, 'ALL SPECS').click()
@@ -275,7 +343,7 @@ class pcmag_scrapper(Scrapper):
                 continue
             
             # Check if thing is check mark or cross
-            check = len(key_and_value[1].find_elements(By.XPATH, "//svg[@data-icon='check']")) > 0
+            check = len(key_and_value[1].find_elements(By.CLASS_NAME, 'inline-block.size-5.text-red-400')) < 1
             if check:
                 specs[key] = 'True'
             else:
@@ -292,12 +360,20 @@ def main():
     # scrapper.get_keyboards()
     # scrapper.get_laptops()
     # scrapper.get_mice()
-    scrapper.get_phones()
-    
-    # Models not implemented yet
-    # scrapper.get_television()
+    # scrapper.get_phones()
+    scrapper.get_television()
     # scrapper.get_monitors()
     # scrapper.get_speakers()
+    
+    # Product = scrapper.categories['mouse']
+    # product = Product(name='Microsoft Surface Mobile Mouse')
+    # scrapper.parse_review(product, {}, 'mouse', 'https://www.pcmag.com/reviews/microsoft-surface-mobile-mouse')
+    # print(product.__str__())
+    
+    # scrapper.reset_names()
+    # products = scrapper.parse_recommendations('mouse', 'https://www.pcmag.com/picks/the-best-computer-mice')
+    # for product in products:
+    #     print(product.__str__())
     
 if __name__ == "__main__":
     main()

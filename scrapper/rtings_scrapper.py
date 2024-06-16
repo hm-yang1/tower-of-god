@@ -68,6 +68,12 @@ class rtings_scrapper(Scrapper):
         products = self.get_products(category, url)
         return products
     
+    def get_speakers(self) -> list:
+        category = 'speaker'
+        url = 'https://www.rtings.com/speaker/reviews/best'
+        products = self.get_products(category, url)
+        return products
+    
     def get_products(self, category:str, url:str) -> list:
         # General get products function
         products = []
@@ -84,10 +90,12 @@ class rtings_scrapper(Scrapper):
         for result in results:
             products.extend(result) 
         pool.close()
-                  
+        
         for product in products:
             print(product.__str__())
         
+        print(len(products))
+
         return products
     
     def parse_best_page(self, url:str) -> list[str]:
@@ -171,6 +179,21 @@ class rtings_scrapper(Scrapper):
         
         driver = self.start(url)
         
+        # Get review date
+        review_info = driver.find_element(By.CLASS_NAME, 'product_page-title-info-right')
+        review_date = review_info.find_element(By.CLASS_NAME, 'date').text.split()
+        day = int(review_date[1][:-1])
+        year = int(review_date[2])
+        month_map = {
+            "Jan": 1, "Feb": 2, "Mar": 3, "Apr": 4,"May": 5, "Jun": 6,
+            "Jul": 7, "Aug": 8, "Sep": 9, "Oct": 10, "Nov": 11, "Dec": 12
+        }
+        month = int(month_map[review_date[0]])
+        product.add_date(year, month, day)
+        
+        # Get product price
+        product = self.get_price(product)
+        
         # Get description of product
         texts = driver.find_element(By.CLASS_NAME, 'product_page-header').find_element(By.CLASS_NAME, 'e-rich_content').find_elements(By.TAG_NAME, 'p')
         for text in texts:
@@ -201,7 +224,13 @@ class rtings_scrapper(Scrapper):
                 product = self.parse_laptop(product, driver)
             case 'mouse':
                 product = self.parse_mouse(product, driver)
-        
+            case 'television':
+                product = self.parse_television(product, driver)
+            case 'monitor':
+                product = self.parse_monitor(product, driver)
+            case 'speaker':
+                product = self.parse_speaker(product, driver)
+
         self.end(driver)
         return product
     
@@ -324,6 +353,57 @@ class rtings_scrapper(Scrapper):
 
         return product
     
+    def parse_television(self, product, driver):
+        specs = self.get_specs(driver)
+        
+        # Get screen size
+        try:
+            size_table = driver.find_element(By.CLASS_NAME, 'e-scrollable_content').find_element(By.TAG_NAME, 'tbody')
+            size = size_table.find_element(By.TAG_NAME, 'strong').text
+            product.add_screen_size(int(re.sub(r'\D', '', size)))
+        except Exception as e:
+            print(product.name + 'Trouble finding tv size')
+        
+        # Get resolution
+        resolution = specs['Resolution']
+        if resolution == '4k':
+            product.add_screen_resolution(3840, 2160)
+        
+        # Get panel type
+        product.add_panel_type(specs['Type'])
+        return product
+    
+    def parse_monitor(self, product, driver):
+        specs = self.get_specs(driver)
+        
+        # Get screen size
+        product.add_screen_size(int(specs['Size'].replace('"', '')))
+        
+        # Get resolution
+        resolution_string = specs['Native Resolution'].split()
+        product.add_screen_resolution(
+            int(resolution_string[0].replace(',', '')),
+            int(resolution_string[2].replace(',', ''))
+        )
+        
+        # Get panel type
+        product.add_panel_type(specs['Pixel Type'])
+        
+        # Get refresh rate
+        product.add_refresh_rate(int(specs['Max Refresh Rate'].split()[0]))
+        
+        return product
+    
+    def parse_speaker(self, product, driver):
+        specs = self.get_specs(driver)
+        
+        product.add_portable(specs['Battery Powered'] == 'Yes')
+        product.add_bluetooth(specs['Bluetooth'] == 'Yes')
+        product.add_wifi(specs['Wi-Fi'] == 'Yes')
+        product.add_speakerphone(specs['Speakerphone'] == 'Yes')
+        
+        return product
+    
     # Helper methods
     def get_card(self, driver, test:str):
         test_str = 'test_' + test
@@ -334,27 +414,38 @@ class rtings_scrapper(Scrapper):
             return None
         
         return driver.find_element(locate_with(By.CLASS_NAME, 'test_group-content').below({By.ID: test_str}))
+    
+    def get_specs(self, driver) -> dict:
+        # Gets basic specs listed at the top of review
+        specs = {}
+        specs_elements = driver.find_element(By.CLASS_NAME, 'e-inline_test_values').find_elements(By.CLASS_NAME, 'featured_items-block-featured')
+        for specs_element in specs_elements:
+            spec = specs_element.find_elements(By.TAG_NAME, 'span')
+            key = spec[0]
+            value = spec[1]
+            specs[key.text] = value.text
+        return specs
+        
 
 def main():
     scrapper = rtings_scrapper()
     # scrapper.get_earbuds()
-    scrapper.get_keyboards()
-    scrapper.get_mice()
-    scrapper.get_laptops()
+    # scrapper.get_keyboards()
+    # scrapper.get_mice()
+    # scrapper.get_laptops()
+    # scrapper.get_television()
+    # scrapper.get_monitors()
+    scrapper.get_speakers()
     
     # scrapper.reset_names()
     # url = 'https://www.rtings.com/mouse/reviews/razer/viper-v3-pro'
     # driver = scrapper.start(url)
     # # scrapper.parse_recommendations('headphones', 'https://www.rtings.com/headphones/reviews/best/headphones')
-    # Product = scrapper.categories['mouse']
-    # product = Product(name='Razer Viper V3 Pro')
-    # scrapper.parse_mouse(product, driver)
+    
+    # Product = scrapper.categories['laptop']
+    # product = Product(name='Apple MacBook Pro 16 (M3, 2023)')
+    # scrapper.parse_review(product, 'laptop', 'https://www.rtings.com/laptop/reviews/apple/macbook-pro-16-m3-2023')
     # print(product.__str__())
-    
-    
-    # Models not implemented yet
-    # scrapper.get_television()
-    # scrapper.get_monitors()
     
 if __name__ == "__main__":
     main()

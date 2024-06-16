@@ -97,8 +97,8 @@ class notebookcheck_scrapper(Scrapper):
         return products
             
     def parse_review(self, category, url):
-        # Try except block needed cause this website gives errors too frequently
-        # Might even be good practice to add to other scrapper
+        # Try except needed cause this website gives errors too frequently
+        # Might be good practice to add to other scrapper
         driver = None
         product = None
         try: 
@@ -107,7 +107,7 @@ class notebookcheck_scrapper(Scrapper):
             
             # Get full article
             article = driver.find_element(By.ID, 'content')
-                        
+            
             # Parse specs
             specs_whole = article.find_elements(By.CLASS_NAME, 'specs_whole')
             if not specs_whole: 
@@ -124,6 +124,18 @@ class notebookcheck_scrapper(Scrapper):
             product = Product(name = name)
             product.add_brand(name.split()[0])
             product.add_review(url)
+            
+            # Get product price
+            product = self.get_price(product)
+            
+            # Get review date
+            review_date_string = article.find_element(By.TAG_NAME, 'time').text
+            review_date = review_date_string.split('/')
+            print(str(review_date))
+            day = int(review_date[1])
+            month = int(review_date[0])
+            year = int(review_date[2])
+            product.add_date(year, month, day)
             
             # Parse rest of specs
             specs_elements = specs_whole[0].find_elements(By.CLASS_NAME, 'specs_element')
@@ -216,12 +228,15 @@ class notebookcheck_scrapper(Scrapper):
 
 def main():
     scrapper = notebookcheck_scrapper()
-    # scrapper.get_phones()
-    scrapper.get_laptops()
+    scrapper.get_phones()
+    # scrapper.get_laptops()
     # scrapper.parse_review('phone', 'https://www.notebookcheck.net/Google-Pixel-8-smartphone-review-Compact-and-with-7-years-of-updates.768436.0.html')
     
-    # Models not implemented yet
-    # scrapper.get_tablets()
+    # product = scrapper.parse_review('laptop', 'https://www.notebookcheck.net/Apple-MacBook-Pro-16-2023-M3-Max-Review-M3-Max-challenges-HX-CPUs-from-AMD-Intel.766414.0.html')
+    # print(str(product))
+    
+    # # Models not implemented yet
+    # # scrapper.get_tablets()
     
 if __name__ == "__main__":
     main()
