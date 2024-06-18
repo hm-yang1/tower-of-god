@@ -3,12 +3,30 @@ from . import Product
 
 class Laptop(Product):
     # Model fields
-    battery_life = models.JSONField(default=list, null=True, blank=True)
+    battery_life = models.JSONField(default=list, blank=True)
     weight = models.FloatField(null=True, blank=True)
     screen_size = models.FloatField(null=True, blank=True)
-    screen_resolution = models.CharField(null=True, max_length=15)
-    processor = models.CharField(null=True, max_length=15)
-    os_version = models.CharField(null=True, max_length=50)
+    screen_resolution = models.CharField(null=True, max_length=100)
+    processor = models.CharField(null=True, max_length=100)
+    os_version = models.CharField(null=True, max_length=100)
+    
+    def combine(self, product):
+        super().combine(product)
+        
+        self.battery_life.extend(product.battery_life)
+        
+        for field in self._meta.get_fields():
+            value_self = getattr(self, field.name)
+            value_product = getattr(product, field.name)
+            if value_self is None:
+                setattr(self, field.name, value_product)
+        
+        return self
+    
+    def add_price(self, price: float):
+        if self.price: return
+        if price and price < 300:
+            self.price = price
     
     def add_battery(self, battery: float, website: str, direct:bool = False):
         if direct:

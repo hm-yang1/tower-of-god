@@ -36,11 +36,14 @@ class Scrapper:
         self.names: list[str]
     
     def get_price(self, product):
-        amazon_url = 'https://www.amazon.sg/s?k=' + product.name
+        amazon_url = 'https://www.amazon.sg/s?k=' + product.get_name()
         driver = self.start(amazon_url)
         
+        print(amazon_url)
+        
         # Need additional waiting cause amazon special, might block if too fast
-        time.sleep(5)
+        driver.implicitly_wait(60)
+        time.sleep(10)
         
         # Get price of product
         search_results = driver.find_elements(By.CSS_SELECTOR, '[data-component-type="s-search-result"]')
@@ -61,9 +64,11 @@ class Scrapper:
         googe_img_url = 'https://www.google.com/search?q=' + product.name + '+official+product+image&udm=2'
         
         driver = self.start(googe_img_url)
+        print(googe_img_url)
         
         # Need additional waiting cause google also special, might block if too fast
-        time.sleep(5)
+        driver.implicitly_wait(60)
+        time.sleep(10)
         
         # Get img url
         img_wrapper = driver.find_element(By.XPATH, '//div[@jsname="dTDiAc"]')
@@ -103,7 +108,6 @@ class Scrapper:
         driver = webdriver.Firefox(self.firefox_options)
         driver.set_window_size(1920, 1080)
         driver.get(url)
-        # driver.implicitly_wait(1)
         return driver
     
     def end(self, webdriver:webdriver):

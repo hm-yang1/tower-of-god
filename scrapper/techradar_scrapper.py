@@ -6,7 +6,7 @@ from selenium.webdriver.support.relative_locator import locate_with
 from multiprocessing.pool import ThreadPool
 from rapidfuzz import fuzz
 from random import sample
-from Scrapper import Scrapper
+from .Scrapper import Scrapper
 
 class techradar_scrapper(Scrapper):
     # This website damn annoying, formatting for product specs not standardised
@@ -24,16 +24,11 @@ class techradar_scrapper(Scrapper):
     def get_methods(self) -> list:
         # return list of methods to call to get data for various categories
         return [
-            self.get_earbuds,
-            self.get_laptops,
-            self.get_phones,
-            self.get_television,
-            self.get_speakers,
-            self.get_tablets,
-            
-            # more easily broken methods
-            self.get_mice,
-            self.get_keyboards,
+            [self.get_earbuds, self.categories['earbuds']],
+            [self.get_laptops, self.categories['laptop']],
+            [self.get_television, self.categories['television']],
+            [self.get_phones, self.categories['phone']],
+            [self.get_speakers, self.categories['speaker']]
         ]
     
     def get_earbuds(self) -> list:
@@ -97,19 +92,18 @@ class techradar_scrapper(Scrapper):
         
         # Get all the recommendation urls fron the best * page
         recommendation_urls = self.parse_best_page(url, filter, page_limit)
-        print(recommendation_urls)
+        print('techradar_scrapper: Got urls')
         
         # Go to each recommedation page and get the recommended products, runs concurrently
         curried_parse_recommendation = lambda x: self.parse_recommendations(category, x)
-        pool = ThreadPool()
+        pool = ThreadPool(6)
         results = pool.map(curried_parse_recommendation, recommendation_urls)
         for result in results:
             products.extend(result) 
         pool.close()
         
-        for product in products:
-            print(product.__str__())
-        
+        print('techradar_scrapper: Finished getting products')
+
         return products
         
     def parse_best_page(self, url, fil:Callable, page_limit:int) -> list[str]:
@@ -117,7 +111,6 @@ class techradar_scrapper(Scrapper):
         for i in range(1, page_limit + 1):
             curr_url = url + '/page/' + str(i)
             driver = self.start(curr_url)
-            print(curr_url)
             
             # Get recommendation links
             results = driver.find_element(By.CLASS_NAME, 'listingResults.best')
@@ -185,9 +178,6 @@ class techradar_scrapper(Scrapper):
         driver = self.start(url)
         
         try:
-            # Get product price
-            product = self.get_price(product)
-            
             # Get review date
             review_date = driver.find_element(By.TAG_NAME, 'time').text.split()
             day = int(review_date[0])
@@ -312,7 +302,9 @@ class techradar_scrapper(Scrapper):
     def parse_phone(self, product, specs):
         product.add_os(specs['OS:'])
         product.add_processor(specs['CPU:'])
-        product.add_screen_size(specs['Screen size:'].split('-')[0])
+        
+        screen_size_string = specs['Screen size:'].split('-')[0]
+        product.add_screen_size(float(screen_size_string))
         
         # Parsing screen resolution
         resolution_string = specs['Resolution:'].split()
@@ -345,7 +337,6 @@ class techradar_scrapper(Scrapper):
         return product
     
     def parse_speaker(self, product, specs):
-        print(str(specs))
         product.add_portable('Battery life:' in specs)
         
         connectivity = None

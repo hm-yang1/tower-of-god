@@ -1,3 +1,5 @@
+from functools import partial
+from operator import is_not
 import re
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -6,7 +8,7 @@ from multiprocessing.pool import ThreadPool
 from multiprocessing import Pool
 from rapidfuzz import fuzz
 from random import sample
-from Scrapper import Scrapper
+from .Scrapper import Scrapper
 
 class notebookcheck_scrapper(Scrapper):
     def __new__(cls):
@@ -23,14 +25,14 @@ class notebookcheck_scrapper(Scrapper):
     def get_methods(self) -> list:
         # return list of methods to call to get data for various categories
         return [
-            self.get_laptops,
-            self.get_phones,
+            [self.get_laptops, self.categories['laptop']],
+            [self.get_phones, self.categories['phone']],
             
             # self.get_tablets,
         ]
     
     def get_laptops(self) -> list:
-        return self.get_products('laptop', 85, 10)
+        return self.get_products('laptop', 88, 10)
     
     def get_phones(self) -> list:
         return self.get_products('phone', 85, 10)
@@ -74,8 +76,7 @@ class notebookcheck_scrapper(Scrapper):
         link_elements = review_table.find_elements(By.PARTIAL_LINK_TEXT, 'review')
         for link_element in link_elements:
             urls.append(link_element.get_attribute('href'))
-        print(str(urls))
-        print(len(urls))
+        print('notebookcheck_scrapper: Got urls')
         
         self.end(driver)
                 
@@ -92,8 +93,9 @@ class notebookcheck_scrapper(Scrapper):
         #     product = self.parse_review(category, url)
         #     products.append(product)
         
-        for product in products:
-            print(product.__str__())
+        products = list(filter(partial(is_not, None), products))
+        print('notebookcheck_scrapper: Finished getting products')
+
         return products
             
     def parse_review(self, category, url):
@@ -125,13 +127,9 @@ class notebookcheck_scrapper(Scrapper):
             product.add_brand(name.split()[0])
             product.add_review(url)
             
-            # Get product price
-            product = self.get_price(product)
-            
             # Get review date
             review_date_string = article.find_element(By.TAG_NAME, 'time').text
             review_date = review_date_string.split('/')
-            print(str(review_date))
             day = int(review_date[1])
             month = int(review_date[0])
             year = int(review_date[2])
@@ -197,7 +195,7 @@ class notebookcheck_scrapper(Scrapper):
         
     def parse_laptop(self, product, specs, article):
         product = self.parse_phone(product, specs, article)
-        product.add_weight(specs['Weight'].split()[0], False)
+        product.add_weight(float(specs['Weight'].split()[0]), False)
         # product.add_os()
         return product
         
@@ -212,7 +210,7 @@ class notebookcheck_scrapper(Scrapper):
         
         # Parsing display
         display_string = specs['Display'].split(',')
-        product.add_screen_size(re.findall(r'\b\d+\.\d+\b', display_string[0])[0])
+        product.add_screen_size(float(re.findall(r'\b\d+\.\d+\b', display_string[0])[0]))
         
         resolution_string = display_string[1].split()
         product.add_screen_resolution(int(resolution_string[0]), int(resolution_string[2]))

@@ -7,7 +7,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.relative_locator import locate_with
 from multiprocessing.pool import ThreadPool
 from rapidfuzz import fuzz
-from Scrapper import Scrapper
+from .Scrapper import Scrapper
 
 class rtings_scrapper(Scrapper):
     def __new__(cls):
@@ -23,13 +23,13 @@ class rtings_scrapper(Scrapper):
     def get_methods(self) -> list:
         # return list of methods to call to get data for various categories
         return [
-            self.get_earbuds,
-            self.get_keyboards,
-            self.get_laptops,
-            self.get_mice,
-            
-            # self.get_monitors,
-            # self.get_television,
+            [self.get_earbuds, self.categories['earbuds']],
+            [self.get_keyboards, self.categories['keyboard']],
+            [self.get_laptops, self.categories['laptop']],
+            [self.get_mice, self.categories['mouse']],
+            [self.get_monitors, self.categories['monitor']],
+            [self.get_television, self.categories['television']],
+            [self.get_speakers, self.categories['speaker']]
         ]
     
     def get_earbuds(self) -> list:
@@ -81,21 +81,18 @@ class rtings_scrapper(Scrapper):
         
         # Get all the recommendation urls fron the best * page
         recommendation_urls = self.parse_best_page(url)
-        print(recommendation_urls)
+        print('rtings_scrapper: Got urls')
 
         # Go to each recommedation page and get the recommended products, runs concurrently
         curried_parse_recommendation = lambda x: self.parse_recommendations(category, x)
-        pool = ThreadPool()
+        pool = ThreadPool(6)
         results = pool.map(curried_parse_recommendation, recommendation_urls)
         for result in results:
             products.extend(result) 
         pool.close()
         
-        for product in products:
-            print(product.__str__())
+        print('rtings_scrapper: Finished getting products')
         
-        print(len(products))
-
         return products
     
     def parse_best_page(self, url:str) -> list[str]:
@@ -190,9 +187,6 @@ class rtings_scrapper(Scrapper):
         }
         month = int(month_map[review_date[0]])
         product.add_date(year, month, day)
-        
-        # Get product price
-        product = self.get_price(product)
         
         # Get description of product
         texts = driver.find_element(By.CLASS_NAME, 'product_page-header').find_element(By.CLASS_NAME, 'e-rich_content').find_elements(By.TAG_NAME, 'p')
@@ -435,7 +429,7 @@ def main():
     # scrapper.get_laptops()
     # scrapper.get_television()
     # scrapper.get_monitors()
-    scrapper.get_speakers()
+    # scrapper.get_speakers()
     
     # scrapper.reset_names()
     # url = 'https://www.rtings.com/mouse/reviews/razer/viper-v3-pro'

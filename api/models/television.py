@@ -3,11 +3,22 @@ from . import Product
 
 class Television(Product):
     screen_size = models.IntegerField(null=True, blank=True)
-    screen_resolution = models.CharField(null=True, max_length=15)
-    panel_type = models.CharField(null=True, max_length=20)
+    screen_resolution = models.CharField(null=True, max_length=50)
+    panel_type = models.CharField(null=True, max_length=50)
+    
+    def combine(self, product):
+        super().combine(product)
+        
+        for field in self._meta.get_fields():
+            value_self = getattr(self, field.name)
+            value_product = getattr(product, field.name)
+            if value_self is None:
+                setattr(self, field.name, value_product)
+        
+        return self
     
     def add_price(self, price: float):
-        if price > 100:
+        if price and price > 100:
             self.price = price
     
     def add_screen_size(self, screen_size: int):

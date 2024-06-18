@@ -4,7 +4,7 @@ from selenium.webdriver.support.relative_locator import locate_with
 from multiprocessing.pool import ThreadPool
 from rapidfuzz import fuzz
 from random import sample
-from Scrapper import Scrapper
+from .Scrapper import Scrapper
 
 class pcmag_scrapper(Scrapper):
     def __new__(cls):
@@ -21,14 +21,14 @@ class pcmag_scrapper(Scrapper):
     def get_methods(self) -> list:
         # return list of methods to call to get data for various categories
         return [
-            self.get_earbuds,
-            self.get_keyboards,
-            self.get_laptops,
-            self.get_mice,
-            self.get_phones,
-            self.get_television,
-            self.get_monitors,
-            self.get_speakers,
+            [self.get_earbuds, self.categories['earbuds']],
+            [self.get_keyboards, self.categories['keyboard']],
+            [self.get_laptops, self.categories['laptop']],
+            [self.get_mice, self.categories['mouse']],
+            [self.get_monitors, self.categories['monitor']],
+            [self.get_television, self.categories['television']],
+            [self.get_phones, self.categories['phone']],
+            [self.get_speakers, self.categories['speaker']],
         ]
     
     def get_earbuds(self) -> list:
@@ -86,18 +86,17 @@ class pcmag_scrapper(Scrapper):
         
         # Get all the recommendation urls fron the best * page
         recommendation_urls = self.parse_best_page(url)
-        print(recommendation_urls)
+        print('pcmag_scrapper: Got urls')
 
         # Go to each recommedation page and get the recommended products, runs concurrently
         curried_parse_recommendation = lambda x: self.parse_recommendations(category, x)
-        pool = ThreadPool()
+        pool = ThreadPool(6)
         results = pool.map(curried_parse_recommendation, recommendation_urls)
         for result in results:
             products.extend(result) 
         pool.close()
         
-        for product in products:
-            print(product.__str__())
+        print('pcmag_scrapper: Finished getting products')
         
         return products
         
@@ -155,9 +154,6 @@ class pcmag_scrapper(Scrapper):
         # Get review date
         review_info = driver.find_element(By.ID, 'author-byline')
         review_date_string = review_info.find_element(By.CSS_SELECTOR, '.md\\:ml-4').text
-        
-        # Get product price
-        product = self.get_price(product)
         
         # Date string might have some random words, need to eliminate
         review_date = re.search(r'(\b\w+ \d{1,2}, \d{4}\b)', review_date_string).group(1).split()
@@ -263,7 +259,7 @@ class pcmag_scrapper(Scrapper):
     def parse_phone(self, product, specs:dict):
         product.add_os(specs['Operating System'])
         product.add_processor(specs['CPU'])
-        product.add_screen_size(specs['Screen Size'])
+        product.add_screen_size(float(specs['Screen Size'].split()[0]))
         
         # Parsing screen resolution
         resolution_string = specs['Screen Resolution'].split()

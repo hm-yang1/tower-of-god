@@ -74,5 +74,5 @@ class ProductViewSet(ReadOnlyModelViewSet):
         vector += SearchVector('description', weight = "C") 
         
         # Full text SearchRank with SearchQeury and SearchVectors
-        queryset = model.objects.annotate(rank = SearchRank(vector, query)).order_by("-rank")
+        queryset = model.objects.annotate(rank = SearchRank(vector, query)).order_by("rank")
         return queryset

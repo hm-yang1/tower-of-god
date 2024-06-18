@@ -3,9 +3,20 @@ from . import Product
 
 class Monitor(Product):
     screen_size = models.IntegerField(null=True, blank=True)
-    screen_resolution = models.CharField(null=True, max_length=15)
+    screen_resolution = models.CharField(null=True, max_length=50)
     refresh_rate = models.IntegerField(null=True, blank=True)
     panel_type = models.CharField(null=True, max_length=20)
+    
+    def combine(self, product):
+        super().combine(product)
+        
+        for field in self._meta.get_fields():
+            value_self = getattr(self, field.name)
+            value_product = getattr(product, field.name)
+            if value_self is None:
+                setattr(self, field.name, value_product)
+        
+        return self
     
     def add_screen_size(self, screen_size: int):
         self.screen_size = screen_size

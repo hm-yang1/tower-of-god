@@ -7,6 +7,17 @@ class Speaker(Product):
     wifi = models.BooleanField(null=True, blank=True)
     speakerphone = models.BooleanField(null=True, blank=True)
     
+    def combine(self, product):
+        super().combine(product)
+        
+        for field in self._meta.get_fields():
+            value_self = getattr(self, field.name)
+            value_product = getattr(product, field.name)
+            if value_self is None:
+                setattr(self, field.name, value_product)
+        
+        return self
+    
     def add_portable(self, portable: bool):
         self.portable = portable
     

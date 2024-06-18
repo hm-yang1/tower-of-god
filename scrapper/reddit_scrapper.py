@@ -5,7 +5,7 @@ from selenium.webdriver.support.relative_locator import locate_with
 from multiprocessing.pool import ThreadPool
 from rapidfuzz import fuzz
 from random import sample
-from Scrapper import Scrapper
+from .Scrapper import Scrapper
 
 class reddit_scrapper(Scrapper):
     # Scrapper to scrape reddit comments of products to get general product sentiment
@@ -26,8 +26,8 @@ class reddit_scrapper(Scrapper):
             self.update_products,
         ]
     
-    def update_products(self, products:list) -> list:
-        pool = ThreadPool(4)
+    def update_products(self, products) -> list:
+        pool = ThreadPool(6)
         results = pool.map(self.update_product, products)
         products = list(results)
         pool.close()
@@ -39,14 +39,11 @@ class reddit_scrapper(Scrapper):
     
     def update_product(self, product):
         urls = self.get_posts(product)
-        print(urls)
+        print('reddit_scrapper: got urls')
         
         for url in urls:
             comments = self.parse_post(url)
             product.add_reddit_comments(comments)
-            
-            # Waiting to prevent reddit from blocking
-            time.sleep(5)
             
         return product
         
@@ -55,7 +52,8 @@ class reddit_scrapper(Scrapper):
         driver = self.start(search_url)
         
         # Wait. Don't be too fast like a bot.
-        driver.implicitly_wait(5)
+        driver.implicitly_wait(60)
+        time.sleep(10)
         
         # Get posts about product
         posts = driver.find_elements(By.CSS_SELECTOR, '[data-testid="post-title"]')
@@ -77,12 +75,13 @@ class reddit_scrapper(Scrapper):
     
     def parse_post(self, url:str) -> list[str]:
         driver = self.start(url)
-        driver.implicitly_wait(5)
+        driver.implicitly_wait(60)
+        time.sleep(10)
         comment_list = []
         
         # Parse title and post words
         title = driver.find_element(By.TAG_NAME, 'h1')
-        post_content = driver.find_element(locate_with(By.CLASS_NAME, 'text-neutral-content').below(title)).find_element(By.TAG_NAME, 'p')
+        post_content = driver.find_element(locate_with(By.CLASS_NAME, 'text-neutral-content').below(title))
         comment_list.append(title.text)
         comment_list.append(post_content.text)
         

@@ -42,6 +42,21 @@ class Product(models.Model):
         result += '\n' + str(self.reviews)
         return result
     
+    def combine(self, product):
+        # Combine 2 product instances of the same product together
+        self.add_price(product.price)
+        self.add_img_url(product.img_url)
+        self.add_description(product.description)
+        self.pros.extend(product.pros)
+        self.cons.extend(product.cons)
+        self.reviews.extend(product.reviews)
+
+        # Choose earlier review date
+        if self.review_date and product.review_date and self.review_date > product.review_date:
+            self.review_date = product.review_date
+        
+        return self
+        
     def add_brand(self, name: str):
         self.brand = name
     
@@ -65,8 +80,7 @@ class Product(models.Model):
         self.description = self.description + "\n" + des
     
     def add_price(self, price: float):
-        if self.price is not None:
-            return
+        if self.price: return
         self.price = price
         
     def add_date(self, year:int, month:int, day:int):
@@ -74,12 +88,17 @@ class Product(models.Model):
         self.review_date = date
     
     def add_img_url(self, url:str):
+        if self.img_url: return
         self.img_url = url
         
     def get_name(self) -> str:
         return self.name
+    
+    def get_reviews(self) -> list:
+        return self.reviews
         
     def remove_duplicates(self):
         self.pros = list(set(self.pros))
         self.cons = list(set(self.cons))
         self.reviews = list(set(self.reviews))
+        self.reddit_comments = list(set(self.reddit_comments))
