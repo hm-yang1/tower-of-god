@@ -2,15 +2,17 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
-from .views.wishlist_views import WishlistViewset
+from .views.wishlist_views import WishlistViewSet
 from .views.user_views import LoginView, LogoutView, RegisterView
 from .views.category_view import CategoryView
 from .views.product_views import ProductViewSet
+from .views.comparison_views import ComparisonViewSet
 
 # router to add product view sets
 router = DefaultRouter()
 router.register(r'products', ProductViewSet, basename='product')
-router.register(r'wishlist', WishlistViewset, basename='wishlist')
+router.register(r'compare', ComparisonViewSet, basename='compare')
+router.register(r'wishlist', WishlistViewSet, basename='wishlist')
 
 urlpatterns = [
     # Authentication Urls
@@ -19,6 +21,5 @@ urlpatterns = [
     path('logout/', LogoutView.as_view()),
     
     # Get URLs
-    path('categories/', CategoryView.as_view()),
     path('', include(router.urls)),
 ]
