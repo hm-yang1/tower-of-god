@@ -10,6 +10,9 @@ from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from models.monitor import Monitor
+from models.speaker import Speaker
+from models.television import Television
 from ..serial.user_serializer import UserSerializer
 from ..models.wishlist import Wishlist, WishlistSerializer
 from ..models.earbuds import Earbuds, EarbudSerializer
@@ -52,11 +55,11 @@ class WishlistViewSet(ModelViewSet):
             case 'phone':
                 product = Phone
             case 'television':
-                product = None
+                product = Television
             case 'monitor':
-                product = None
+                product = Monitor
             case 'speaker':
-                product = None
+                product = Speaker
             case _:
                 return Response({"error": "Invalid product category"}, status=status.HTTP_400_BAD_REQUEST)
 
