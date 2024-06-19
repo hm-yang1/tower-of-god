@@ -15,7 +15,7 @@ from ..models.phone import Phone, PhoneSerializer
 from ..models.speaker import Speaker, SpeakerSerializer
 from ..models.television import Television, TelevisionSerializer
 
-# Viewset for all products
+# Viewset to query all products
 class ProductViewSet(ReadOnlyModelViewSet):
     # Categories of products
     # placed here for convience, not sure if this is the most correct place to put this

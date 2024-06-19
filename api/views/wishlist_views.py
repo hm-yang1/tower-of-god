@@ -21,7 +21,7 @@ from ..models.phone import Phone, PhoneSerializer
 # Wishlist views
 
 # View to get wishlist of user that sent the request
-class WishlistViewset(ModelViewSet):
+class WishlistViewSet(ModelViewSet):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     
