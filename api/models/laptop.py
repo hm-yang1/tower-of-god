@@ -1,5 +1,7 @@
 from django.db import models
 from . import Product
+from rest_framework import serializers
+from django.contrib.postgres.search import SearchVector
 
 class Laptop(Product):
     # Model fields
@@ -22,6 +24,14 @@ class Laptop(Product):
                 setattr(self, field.name, value_product)
         
         return self
+    
+    def get_category_display(self):
+        return 'laptop'
+    
+    @classmethod
+    def get_vector(cls):
+        vector = SearchVector('battery_life', 'screen_resolution', 'processor', 'os_version', weight='A')
+        return vector
     
     def add_price(self, price: float):
         if self.price: return
@@ -64,3 +74,9 @@ class Laptop(Product):
         
         return string
     
+class LaptopSerializer(serializers.ModelSerializer):
+    category = serializers.CharField(source='get_category_display', read_only=True)
+    
+    class Meta:
+        model = Laptop
+        fields = '__all__'

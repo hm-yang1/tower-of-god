@@ -1,5 +1,6 @@
 from django.db import models
 from . import Product
+from rest_framework import serializers
 
 class Mouse(Product):
     # Model fields
@@ -18,6 +19,9 @@ class Mouse(Product):
                 setattr(self, field.name, value_product)
         
         return self
+    
+    def get_category_display(self):
+        return 'mouse'
     
     def add_wireless(self, wireless: bool):
         self.wireless = wireless
@@ -47,3 +51,12 @@ class Mouse(Product):
         string += '\n' + str(self.dpi)
         string += '\n' + str(self.weight)
         return string
+    
+
+class MouseSerializer(serializers.ModelSerializer):
+    category = serializers.CharField(source='get_category_display', read_only=True)
+    
+    class Meta:
+        model = Mouse
+        fields = '__all__'
+

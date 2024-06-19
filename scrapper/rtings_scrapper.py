@@ -226,6 +226,7 @@ class rtings_scrapper(Scrapper):
                 product = self.parse_speaker(product, driver)
 
         self.end(driver)
+        product.remove_duplicates()
         return product
     
     # Below are methods that parse additionaly info for each category

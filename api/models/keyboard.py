@@ -1,6 +1,7 @@
 import math
 from django.db import models
 from . import Product
+from rest_framework import serializers
 
 class Keyboard(Product):
     # Model fields
@@ -18,6 +19,9 @@ class Keyboard(Product):
                 setattr(self, field.name, value_product)
         
         return self
+    
+    def get_category_display(self):
+        return 'keyboard'
 
     def add_wireless(self, wireless: bool):
         self.wireless = wireless
@@ -38,3 +42,10 @@ class Keyboard(Product):
         string += '\n' + str(self.size)
         string += '\n' + str(self.key_switches)
         return string
+
+class KeyboardSerializer(serializers.ModelSerializer):
+    category = serializers.CharField(source='get_category_display', read_only=True)
+    
+    class Meta:
+        model = Keyboard
+        fields = '__all__'

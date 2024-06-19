@@ -237,6 +237,7 @@ class techradar_scrapper(Scrapper):
         finally:
             self.end(driver)
         
+        product.remove_duplicates()
         return product
     
     def parse_earbuds(self, product, specs):

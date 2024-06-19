@@ -1,5 +1,6 @@
 from django.db import models
 from . import Product
+from rest_framework import serializers
 
 class Speaker(Product):
     portable = models.BooleanField(null=True, blank=True)
@@ -37,3 +38,10 @@ class Speaker(Product):
         string += '\n' + 'Wifi: ' + str(self.wifi)
         string += '\n' + 'Speakerphone: ' + str(self.speakerphone)
         return string
+
+class SpeakerSerializer(serializers.ModelSerializer):
+    category = serializers.CharField(source='get_category_display', read_only=True)
+    
+    class Meta:
+        model = Speaker
+        fields = '__all__'

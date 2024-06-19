@@ -1,5 +1,6 @@
 from django.db import models
 from . import Product
+from rest_framework import serializers
 
 class Phone(Product):
     # Model fields
@@ -20,6 +21,10 @@ class Phone(Product):
             value_product = getattr(product, field.name)
             if value_self is None:
                 setattr(self, field.name, value_product)
+        return self
+    
+    def get_category_display(self):
+        return 'phone'
 
     def add_battery(self, battery: float, website: str, direct:bool = False):
         if direct:
@@ -47,3 +52,7 @@ class Phone(Product):
         string += '\n' + str(self.processor)
         return string
         
+class PhoneSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Phone
+        fields = '__all__'

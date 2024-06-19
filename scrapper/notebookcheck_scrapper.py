@@ -191,6 +191,7 @@ class notebookcheck_scrapper(Scrapper):
         finally:
             if driver is not None:
                 driver = self.end(driver)
+            product.remove_duplicates()
             return product
         
     def parse_laptop(self, product, specs, article):

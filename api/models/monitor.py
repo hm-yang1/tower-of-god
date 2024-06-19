@@ -1,5 +1,6 @@
 from django.db import models
 from . import Product
+from rest_framework import serializers
 
 class Monitor(Product):
     screen_size = models.IntegerField(null=True, blank=True)
@@ -37,3 +38,10 @@ class Monitor(Product):
         string += '\n' + 'Refresh rate: ' + str(self.refresh_rate)
         string += '\n' + 'Type: ' + str(self.panel_type)
         return string
+    
+class MonitorSerializer(serializers.ModelSerializer):
+    category = serializers.CharField(source='get_category_display', read_only=True)
+    
+    class Meta:
+        model = Monitor
+        fields = '__all__'

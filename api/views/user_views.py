@@ -3,9 +3,12 @@ from django.contrib.auth import authenticate
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
+from rest_framework.generics import RetrieveUpdateDestroyAPIView
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from rest_framework import permissions, status
 from ..serial.user_serializer import UserRegisterSerializer, UserSerializer
 
@@ -57,15 +60,13 @@ class LogoutView(APIView):
         try:
             token = RefreshToken(refresh_token)
             token.blacklist()
+            
             return Response({'success': 'Successfully logged out'}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"message": "Invalid or expired token.", "error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         
 class ProfileView(APIView):
     pass
-
-class HistoryView(APIView):
-    pass
-
+    
 class FavoritesView(APIView):
     pass

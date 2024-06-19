@@ -1,5 +1,6 @@
 from django.db import models
 from . import Product
+from rest_framework import serializers
 
 class Television(Product):
     screen_size = models.IntegerField(null=True, blank=True)
@@ -37,4 +38,9 @@ class Television(Product):
         string += '\n' + 'Type: ' + str(self.panel_type)
         return string
 
-        
+class TelevisionSerializer(serializers.ModelSerializer):
+    category = serializers.CharField(source='get_category_display', read_only=True)
+    
+    class Meta:
+        model = Television
+        fields = '__all__'

@@ -25,7 +25,7 @@ class Command(BaseCommand):
                 common_name = process.extractOne(
                     product.get_name(), 
                     existing_names, 
-                    scorer=fuzz.token_ratio, 
+                    scorer=fuzz.ratio, 
                     processor = utils.default_process, 
                     score_cutoff= 85
                 )

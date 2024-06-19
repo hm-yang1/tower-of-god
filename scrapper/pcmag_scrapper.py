@@ -210,6 +210,7 @@ class pcmag_scrapper(Scrapper):
                 product = self.parse_speaker(product, specs)
                 
         self.end(driver)
+        product.remove_duplicates()
         return product
     
     def parse_earbuds(self, product, specs:dict):

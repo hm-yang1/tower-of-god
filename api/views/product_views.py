@@ -1,36 +1,35 @@
 from django.contrib.postgres.search import SearchQuery, SearchVector, SearchRank
+from django.db.models import Count, F
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
+from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_framework.filters import SearchFilter
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django_filters.rest_framework import DjangoFilterBackend
 from rapidfuzz import process, fuzz, utils
-from ..models.product import Product
-from ..models.earbuds import Earbuds
-from ..models.headphones import Headphones
-from ..models.keyboard import Keyboard
-from ..models.laptop import Laptop
-from ..models.mouse import Mouse
-from ..models.phone import Phone
-from ..serial.product_serializers import (
-    EarbudSerializer, 
-    KeyboardSerializer, 
-    LaptopSerializer, 
-    MouseSerializer, 
-    PhoneSerializer,
-)
+from ..models.earbuds import Earbuds, EarbudSerializer
+from ..models.keyboard import Keyboard, KeyboardSerializer
+from ..models.laptop import Laptop, LaptopSerializer
+from ..models.monitor import Monitor, MonitorSerializer
+from ..models.mouse import Mouse, MouseSerializer
+from ..models.phone import Phone, PhoneSerializer
+from ..models.speaker import Speaker, SpeakerSerializer
+from ..models.television import Television, TelevisionSerializer
 
 # Viewset for all products
 class ProductViewSet(ReadOnlyModelViewSet):
     # Categories of products
     # placed here for convience, not sure if this is the most correct place to put this
     categories = {
-            'earphones': [Earbuds, EarbudSerializer, []],
-            'keyboard': [Keyboard, KeyboardSerializer, []],
-            'laptop': [Laptop, LaptopSerializer, []],
-            'mouse': [Mouse, MouseSerializer, []],
-            'phone': [Phone, PhoneSerializer, []]
-        }
+        'earbuds': [Earbuds, EarbudSerializer, Earbuds.get_filters()],
+        'headphone':[Earbuds, EarbudSerializer, []],
+        'keyboard': [Keyboard, KeyboardSerializer, []],
+        'laptop': [Laptop, LaptopSerializer, []],
+        'monitor': [Monitor, MonitorSerializer, []],
+        'mouse': [Mouse, MouseSerializer, []],
+        'phone': [Phone, PhoneSerializer, []],
+        'speaker': [Speaker, SpeakerSerializer, []],
+        'television': [Television, TelevisionSerializer, []],
+    }
     
     # authentication_classes = [JWTAuthentication]
     # permission_classes = [IsAuthenticated]
@@ -38,7 +37,7 @@ class ProductViewSet(ReadOnlyModelViewSet):
     filter_backends = [SearchFilter, DjangoFilterBackend]
     
     # After determining category, extend filter fields
-    filterset_fields = ['brand', 'MSRP', 'release_date']
+    filterset_fields = ['brand', 'price', 'review_date']
         
     # Determines catergory through fuzzy search. Performs full text search in the product fields
     def get_queryset(self):
@@ -55,7 +54,7 @@ class ProductViewSet(ReadOnlyModelViewSet):
         
         # Remove category from search_string
         words = search_string.split()
-        closest_match = process.extractOne(category, words, scorer=fuzz.ratio)[0]
+        closest_match = process.extractOne(category, words, scorer=fuzz.token_ratio)[0]
         words.remove(closest_match)
         search_string = ' '.join(words)
         
@@ -71,8 +70,23 @@ class ProductViewSet(ReadOnlyModelViewSet):
         
         # Vectors determine fields to search for and weight of each field
         vector = SearchVector('name', 'brand', 'pros', weight = 'A')
-        vector += SearchVector('description', weight = "C") 
+        vector += SearchVector('description', weight = 'C') 
+        
+        # Add vectors specific to each product category
+        # vector += model.get_vector()
+        print(vector)
         
         # Full text SearchRank with SearchQeury and SearchVectors
-        queryset = model.objects.annotate(rank = SearchRank(vector, query)).order_by("rank")
+        queryset = model.objects.annotate(rank = SearchRank(
+            vector, 
+            query,
+            normalization = 4,
+        )).order_by("-rank")
+        
+        # Additional weights with no. of reviews and reddit sentiment. Eg.
+        
+        # queryset = queryset.annotate(
+        #     final_rank=F('search_rank') * 0.3 + F('num_reviews') * 0.7
+        # ).order_by('-final_rank')
+        
         return queryset
