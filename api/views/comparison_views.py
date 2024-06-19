@@ -1,11 +1,7 @@
 from django.contrib.postgres.search import SearchQuery, SearchVector, SearchRank
 from django.db.models import Count, F
-from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_framework.filters import SearchFilter
-from rest_framework_simplejwt.authentication import JWTAuthentication
-from django_filters.rest_framework import DjangoFilterBackend
-from rapidfuzz import process, fuzz, utils
 from ..models.earbuds import Earbuds, EarbudSerializer
 from ..models.keyboard import Keyboard, KeyboardSerializer
 from ..models.laptop import Laptop, LaptopSerializer
