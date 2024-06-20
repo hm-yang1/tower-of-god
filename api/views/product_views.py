@@ -2,7 +2,7 @@ from django.contrib.postgres.search import SearchQuery, SearchVector, SearchRank
 from django.db.models import Count, F
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.viewsets import ReadOnlyModelViewSet
-from rest_framework.filters import SearchFilter
+from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django_filters.rest_framework import DjangoFilterBackend
 from rapidfuzz import process, fuzz, utils
@@ -15,32 +15,54 @@ from ..models.phone import Phone, PhoneSerializer
 from ..models.speaker import Speaker, SpeakerSerializer
 from ..models.television import Television, TelevisionSerializer
 
+# Custom ordering filter to always sort null values to the bottom
+class NullsAlwaysLastOrderingFilter(OrderingFilter):
+    def filter_queryset(self, request, queryset, view):
+        ordering = self.get_ordering(request, queryset, view)
+        if ordering:
+            f_ordering = []
+            for o in ordering:
+                if not o:
+                    continue
+                if o[0] == '-':
+                    f_ordering.append(F(o[1:]).desc(nulls_last=True))
+                else:
+                    f_ordering.append(F(o).asc(nulls_last=True))
+            return queryset.order_by(*f_ordering)
+        return queryset
+
 # Viewset to query all products
 class ProductViewSet(ReadOnlyModelViewSet):
     # Categories of products
     # placed here for convience, not sure if this is the most correct place to put this
     categories = {
-        'earbuds': [Earbuds, EarbudSerializer, Earbuds.get_filters()],
-        'headphone':[Earbuds, EarbudSerializer, []],
-        'keyboard': [Keyboard, KeyboardSerializer, []],
-        'laptop': [Laptop, LaptopSerializer, []],
-        'monitor': [Monitor, MonitorSerializer, []],
-        'mouse': [Mouse, MouseSerializer, []],
-        'phone': [Phone, PhoneSerializer, []],
-        'speaker': [Speaker, SpeakerSerializer, []],
-        'television': [Television, TelevisionSerializer, []],
+        'earbuds': [Earbuds, EarbudSerializer],
+        'headphone':[Earbuds, EarbudSerializer],
+        'keyboard': [Keyboard, KeyboardSerializer],
+        'laptop': [Laptop, LaptopSerializer],
+        'monitor': [Monitor, MonitorSerializer],
+        'mouse': [Mouse, MouseSerializer],
+        'phone': [Phone, PhoneSerializer],
+        'speaker': [Speaker, SpeakerSerializer],
+        'television': [Television, TelevisionSerializer],
     }
     
     # authentication_classes = [JWTAuthentication]
     # permission_classes = [IsAuthenticated]
     
-    filter_backends = [SearchFilter, DjangoFilterBackend]
+    filter_backends = [SearchFilter, NullsAlwaysLastOrderingFilter, DjangoFilterBackend]
     
     # After determining category, extend filter fields
     filterset_fields = ['brand', 'price', 'review_date']
+    
+    # Ordering fields, extend after determining category
+    ordering_fields = ['price', 'review_date']
         
     # Determines catergory through fuzzy search. Performs full text search in the product fields
     def get_queryset(self):
+        # Reset filterset_fields
+        self.reset()
+        
         # Get search query from http request
         search_string = str(self.request.query_params.get('q', None))
         print(search_string)
@@ -62,10 +84,16 @@ class ProductViewSet(ReadOnlyModelViewSet):
         cat_info = self.categories.get(category)
         model = cat_info[0]
         self.serializer_class = cat_info[1]
-        self.filterset_fields.extend(cat_info[2])
+        
+        # Extend filterset_fields
+        self.filterset_fields = self.filterset_fields + model.get_filters()
+        print(self.filterset_fields)
+        
+        # Extend odering_fields
+        self.ordering_fields = self.ordering_fields + model.get_orders()
+        print(self.ordering_fields)
         
         # Full text search
-        print(search_string)
         query = SearchQuery(search_string)
         
         # Vectors determine fields to search for and weight of each field
@@ -73,8 +101,7 @@ class ProductViewSet(ReadOnlyModelViewSet):
         vector += SearchVector('description', weight = 'C') 
         
         # Add vectors specific to each product category
-        # vector += model.get_vector()
-        print(vector)
+        vector += model.get_vectors()
         
         # Full text SearchRank with SearchQeury and SearchVectors
         queryset = model.objects.annotate(rank = SearchRank(
@@ -88,5 +115,8 @@ class ProductViewSet(ReadOnlyModelViewSet):
         # queryset = queryset.annotate(
         #     final_rank=F('search_rank') * 0.3 + F('num_reviews') * 0.7
         # ).order_by('-final_rank')
-        
         return queryset
+    
+    def reset(self):
+        self.filterset_fields = ['brand', 'price', 'review_date']
+        self.ordering_fields = ['price', 'review_date']
