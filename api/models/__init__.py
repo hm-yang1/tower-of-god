@@ -5,7 +5,7 @@ from .keyboard import Keyboard, KeyboardSerializer
 from .laptop import Laptop, LaptopSerializer
 from .mouse import Mouse, MouseSerializer
 from .phone import Phone, PhoneSerializer
-from .television import Television
-from .monitor import Monitor
-from .speaker import Speaker
+from .television import Television, TelevisionSerializer
+from .monitor import Monitor, MonitorSerializer
+from .speaker import Speaker, SpeakerSerializer
 from .wishlist import Wishlist, WishlistSerializer

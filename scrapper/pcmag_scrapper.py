@@ -254,7 +254,9 @@ class pcmag_scrapper(Scrapper):
         
         product.add_buttons(int(specs['Number of Buttons']))
         product.add_dpi(int(specs['Sensor Maximum Resolution'].split()[0]))
-        product.add_weight(float(specs['Weight'].split()[0]), True)
+        
+        weight_string = specs['Weight'].split()
+        product.add_weight(float(weight_string[0]), ounces=weight_string[1]=='ounces', pounds=weight_string[1]=='pounds')
         return product
     
     def parse_phone(self, product, specs:dict):
