@@ -10,16 +10,16 @@ from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from models.monitor import Monitor
-from models.speaker import Speaker
-from models.television import Television
+from ..models.monitor import Monitor
+from ..models.speaker import Speaker
+from ..models.television import Television
+from ..models.earbuds import Earbuds
+from ..models.keyboard import Keyboard
+from ..models.laptop import Laptop
+from ..models.mouse import Mouse
+from ..models.phone import Phone
 from ..serial.user_serializer import UserSerializer
 from ..models.wishlist import Wishlist, WishlistSerializer
-from ..models.earbuds import Earbuds, EarbudSerializer
-from ..models.keyboard import Keyboard, KeyboardSerializer
-from ..models.laptop import Laptop, LaptopSerializer
-from ..models.mouse import Mouse, MouseSerializer
-from ..models.phone import Phone, PhoneSerializer
 
 # Wishlist views
 

@@ -11,9 +11,9 @@ from .keyboard import Keyboard, KeyboardSerializer
 from .laptop import Laptop, LaptopSerializer
 from .mouse import Mouse, MouseSerializer
 from .phone import Phone, PhoneSerializer
-from models.monitor import Monitor, MonitorSerializer
-from models.speaker import Speaker, SpeakerSerializer
-from models.television import Television, TelevisionSerializer
+from .monitor import Monitor, MonitorSerializer
+from .speaker import Speaker, SpeakerSerializer
+from .television import Television, TelevisionSerializer
 
 class Wishlist(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='search_histories')
