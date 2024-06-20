@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models.functions import Cast
+from django.contrib.postgres.search import SearchVector
 from . import Product
 from rest_framework import serializers
 
@@ -8,8 +10,32 @@ class Phone(Product):
     os_version = models.CharField(null=True, max_length=50)
     size = models.IntegerField(null=True, blank=True)
     screen_resolution = models.CharField(null=True, max_length=50)
-    screen_refresh_rate = models.IntegerField(null=True, blank=True)
     processor = models.CharField(null=True, max_length=50)
+    
+    # Additional search vectors
+    @classmethod
+    def get_vectors(cls):
+        vector = SearchVector('battery_life', 'screen_resolution', 'processor', 'os_version', weight='A')
+        vector += SearchVector(Cast('size', models.CharField()), weight='A')
+        return vector
+    
+    # Additional filter fields
+    @classmethod
+    def get_filters(cls):
+        return [
+            'battery_life',
+            'os_version',
+            'size',
+            'screen_resolution',
+            'processor',
+        ]
+        
+    # Additional ordering fields
+    @classmethod
+    def get_orders(cls):
+        return [
+            'screen_size'
+        ]
     
     def combine(self, product):
         super().combine(product)

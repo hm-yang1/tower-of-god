@@ -1,7 +1,8 @@
 from django.db import models
+from django.db.models.functions import Cast
+from django.contrib.postgres.search import SearchVector
 from . import Product
 from rest_framework import serializers
-from django.contrib.postgres.search import SearchVector
 
 class Laptop(Product):
     # Model fields
@@ -11,6 +12,32 @@ class Laptop(Product):
     screen_resolution = models.CharField(null=True, max_length=100)
     processor = models.CharField(null=True, max_length=100)
     os_version = models.CharField(null=True, max_length=100)
+    
+    # Additional search vectors
+    @classmethod
+    def get_vectors(cls):
+        vector = SearchVector('battery_life', 'screen_resolution', 'processor', 'os_version', weight='A')
+        vector += SearchVector(Cast('screen_size', models.CharField()), weight='A')
+        return vector
+    
+    # Additional filter fields
+    @classmethod
+    def get_filters(cls):
+        return [
+            'weight',
+            'screen_size',
+            'screen_resolution',
+            'processor',
+            'os_version'
+        ]
+    
+    # Additional ordering fields
+    @classmethod
+    def get_orders(cls):
+        return [
+            'weight',
+            'screen_size',
+        ]
     
     def combine(self, product):
         super().combine(product)
@@ -27,11 +54,6 @@ class Laptop(Product):
     
     def get_category_display(self):
         return 'laptop'
-    
-    @classmethod
-    def get_vector(cls):
-        vector = SearchVector('battery_life', 'screen_resolution', 'processor', 'os_version', weight='A')
-        return vector
     
     def add_price(self, price: float):
         if self.price: return

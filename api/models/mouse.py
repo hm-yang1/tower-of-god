@@ -1,4 +1,7 @@
 from django.db import models
+from django.db.models import Case, When, Value
+from django.db.models.functions import Cast
+from django.contrib.postgres.search import SearchVector
 from . import Product
 from rest_framework import serializers
 
@@ -9,6 +12,40 @@ class Mouse(Product):
     dpi = models.IntegerField(null=True)
     weight = models.FloatField(null=True)
     
+    # Additional search vectors
+    @classmethod
+    def get_vectors(cls):
+        vector = SearchVector(
+            Case(
+                When(wireless = True, then=Value('wireless')),
+                When(wireless = False, then=Value('wired')),
+                output_field=models.CharField()
+            ), weight='A'
+        )
+        vector += SearchVector(Cast('buttons_count', models.CharField()), weight='A')
+        vector += SearchVector(Cast('dpi', models.CharField()), weight='A')
+        vector += SearchVector(Cast('weight', models.CharField()), weight='A')
+        return vector
+    
+    # Additional filter fields
+    @classmethod
+    def get_filters(cls):
+        return [
+            'wireless',
+            'buttons_count',
+            'dpi',
+            'weight'
+        ]
+        
+    # Additional ordering fields
+    @classmethod
+    def get_orders(cls):
+        return [
+            'buttons_count',
+            'dpi',
+            'weight',
+        ]
+        
     def combine(self, product):
         super().combine(product)
         
@@ -36,11 +73,13 @@ class Mouse(Product):
             return
         self.dpi = dpi
         
-    def add_weight(self, weight: float, ounces:bool):
+    def add_weight(self, weight: float, ounces:bool=False, pounds:bool=False):
         if self.weight is not None:
             return
         if ounces:
             self.weight = weight * 28.35
+        elif pounds:
+            self.weight = weight * 453.6
         else:
             self.weight = weight
     

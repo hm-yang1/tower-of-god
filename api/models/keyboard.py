@@ -1,7 +1,10 @@
 import math
 from django.db import models
+from django.db.models import Case, When, Value
+from django.db.models.functions import Cast
 from . import Product
 from rest_framework import serializers
+from django.contrib.postgres.search import SearchVector
 
 class Keyboard(Product):
     # Model fields
@@ -9,6 +12,37 @@ class Keyboard(Product):
     size = models.IntegerField(null=True, blank=True)
     key_switches = models.CharField(null=True, max_length=50)
     
+    # Get additional search vectors
+    @classmethod
+    def get_vectors(cls):
+        # cast bool fields to char
+        vector = SearchVector('earphone_type', weight = 'A')
+        vector += SearchVector(
+            Case(
+                When(wireless = True, then=Value('wireless')),
+                When(wireless = False, then=Value('wired')),
+                output_field=models.CharField()
+            ), weight='A'
+        )
+        vector += SearchVector(Cast('size', models.CharField()), weight='A')
+        return vector
+    
+    # Additional filter fields
+    @classmethod
+    def get_filters(cls):
+        return [
+            'wireless',
+            'size',
+            'key_switches',
+        ]
+    
+    # Additional ordering fields
+    @classmethod
+    def get_orders(cls):
+        return [
+            'size'
+        ]
+        
     def combine(self, product):
         super().combine(product)
         

@@ -1,7 +1,9 @@
 from django.db import models
+from django.db.models import Case, When, Value
+from django.db.models.functions import Cast
+from django.contrib.postgres.search import SearchVector
 from . import Product
 from rest_framework import serializers
-from django.contrib.postgres.search import SearchVector
 
 class Earbuds(Product):
     # Model fields
@@ -13,6 +15,44 @@ class Earbuds(Product):
     
     active_noise_cancellation = models.BooleanField(null=True, blank=True)
     
+    # Get additional search vectors for earbuds
+    @classmethod
+    def get_vectors(cls):
+        # cast bool fields to char
+        vector = SearchVector('earphone_type', weight = 'A')
+        vector += SearchVector(
+            Case(
+                When(wireless = True, then=Value('wireless')),
+                When(wireless = False, then=Value('wired')),
+                output_field=models.CharField()
+            ), weight='A'
+        )
+        vector += SearchVector(
+            Case(
+                When(active_noise_cancellation=True, then=Value('noise cancelling')),
+                output_field=models.CharField()
+            ), weight='A'
+        )
+        vector += SearchVector(Cast('battery_life', models.CharField()), weight='A')
+        return vector
+    
+    # Additional filter fields
+    @classmethod
+    def get_filters(cls):
+        return [
+            'earphone_type',
+            'wireless',
+            'battery_life',
+            'active_noise_cancellation',
+        ]
+        
+    # Additional ordering fields
+    @classmethod
+    def get_orders(cls):
+        return [
+            'battery_life'
+        ]
+    
     def combine(self, product):
         super().combine(product)
         
@@ -23,19 +63,6 @@ class Earbuds(Product):
                 setattr(self, field.name, value_product)
             
         return self
-    
-    # Get additional search vectors for earbuds
-    @classmethod
-    def get_vector(cls):
-        # cast bool fields to char
-        vector = SearchVector('earphone_type', weight = 'A')
-        return vector
-    
-    @classmethod
-    def get_filters(cls):
-        return [
-            'earphone_type',
-        ]
         
     # No point creating new column, just adding this to every serialized product
     def get_category_display(self):

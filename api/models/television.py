@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models.functions import Cast
+from django.contrib.postgres.search import SearchVector
 from . import Product
 from rest_framework import serializers
 
@@ -6,6 +8,24 @@ class Television(Product):
     screen_size = models.IntegerField(null=True, blank=True)
     screen_resolution = models.CharField(null=True, max_length=50)
     panel_type = models.CharField(null=True, max_length=50)
+    
+    # Additional search vectors
+    @classmethod
+    def get_vectors(cls):
+        vector = SearchVector('panel_type', 'screen_resolution', weight='A')
+        vector += SearchVector(Cast('screen_size', models.CharField()), weight='A')
+        vector += SearchVector(Cast('screen_resolution', models.CharField()), weight='A')
+        return vector
+    
+    # Additional filter fields
+    @classmethod
+    def get_filters(cls):
+        return [
+            'screen_size',
+            'screen_resolution',
+            'refresh_rate',
+            'panel_type'
+        ]
     
     def combine(self, product):
         super().combine(product)

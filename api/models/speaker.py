@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models import Case, When, Value
+from django.contrib.postgres.search import SearchVector
 from . import Product
 from rest_framework import serializers
 
@@ -7,6 +9,55 @@ class Speaker(Product):
     bluetooth = models.BooleanField(null=True, blank=True)
     wifi = models.BooleanField(null=True, blank=True)
     speakerphone = models.BooleanField(null=True, blank=True)
+    
+    # Get additional search vectors for earbuds
+    @classmethod
+    def get_vectors(cls):
+        # cast bool fields to char
+        vector = SearchVector(
+            Case(
+                When(bluetooth = True, then=Value('wireless')),
+                When(bluetooth = False, then=Value('wired')),
+                output_field=models.CharField()
+            ), weight='A'
+        )
+        vector += SearchVector(
+            Case(
+                When(wifi = True, then=Value('wireless')),
+                When(wifi = False, then=Value('wired')),
+                output_field=models.CharField()
+            ), weight='A'
+        )
+        vector += SearchVector(
+            Case(
+                When(portable = True, then=Value('portable')),
+                output_field=models.CharField()
+            ), weight='A'
+        )
+        vector += SearchVector(
+            Case(
+                When(speakerphone=True, then=Value('speakerphone')),
+                output_field=models.CharField()
+            ), weight='A'
+        )
+        return vector
+    
+    # Additional filter fields
+    @classmethod
+    def get_filters(cls):
+        return [
+            'portable',
+            'bluetooth',
+            'wifi',
+            'speakerphone',
+        ]
+    
+    # Additional ordering fields
+    @classmethod
+    def get_orders(cls):
+        return [
+            
+        ]
     
     def combine(self, product):
         super().combine(product)
