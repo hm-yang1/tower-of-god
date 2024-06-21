@@ -16,6 +16,8 @@ from dotenv import load_dotenv
 from pathlib import Path
 from datetime import timedelta
 
+load_dotenv()
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -160,7 +162,6 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-load_dotenv()
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -171,6 +172,25 @@ DATABASES = {
         'PORT': os.environ.get('DB_PORT'),
     }
 }
+
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.azure_storage.AzureStorage",
+        "OPTIONS": {
+            "account_name": os.environ.get('AZURE_ACCOUNT_NAME'),
+            "azure_container": os.environ.get('AZURE_CONTAINER'),
+            "account_key": os.environ.get('AZURE_ACCOUNT_KEY'),
+            "location": 'media',
+            "timeout": 30,
+            "expiration_secs": None
+        },
+    },
+    "staticfiles": {
+        "BACKEND": "storages.backends.azure_storage.AzureStorage",
+    }
+}
+MEDIA_URL = f'https://{os.environ.get('AZURE_ACCOUNT_NAME')}.blob.core.windows.net/{os.environ.get('AZURE_CONTAINER')}/media/'
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
