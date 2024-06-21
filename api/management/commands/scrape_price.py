@@ -10,21 +10,16 @@ class Command(Command):
         scrapper = Scrapper()
         product_categories = scrapper.categories.values()
         
-        for Product in product_categories:
-            print('scrapping: ' + str(Product))
-            
-            queryset = Product.objects.all()
-            pool = ThreadPool(6)
-            products = pool.map(self.scrape_price, queryset)
-            for product in products:
-                product.save() 
-            pool.close()
+        pool = ThreadPool(len(product_categories))
+        curried_func = lambda x: self.scrape_img_helper(x, scrapper)
+        pool.map(curried_func, product_categories)
         
-        print('finished scraping prices')
         return
     
-    def scrape_price(self, product):
-        scrapper = Scrapper()
-        scrapper.get_price(product)
-        print(product)
-        return product
+    def scrape_price_helper(self, Product, scrapper):
+        print('scrapping: ' + str(Product))
+        for product in Product.objects.all():
+            # Get img url
+            scrapper.get_img_url(product)
+            print(product.get_name())
+            product.save()
