@@ -29,6 +29,7 @@ class NullsAlwaysLastOrderingFilter(OrderingFilter):
                 else:
                     f_ordering.append(F(o).asc(nulls_last=True))
             return queryset.order_by(*f_ordering)
+        print('Entered custom ordering')
         return queryset
 
 # Viewset to query all products
