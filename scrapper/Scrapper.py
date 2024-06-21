@@ -8,6 +8,7 @@ django.setup()
 import api.models as model
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.common.exceptions import NoSuchElementException
 from bisect import insort
 from bisect import bisect_left
 from urllib.parse import unquote
@@ -36,55 +37,70 @@ class Scrapper:
         self.names: list[str]
     
     def get_price(self, product):
+        if product.get_price():
+            return product
+        
         amazon_url = 'https://www.amazon.sg/s?k=' + product.get_name()
         driver = self.start(amazon_url)
-        
         print(amazon_url)
         
         # Need additional waiting cause amazon special, might block if too fast
         driver.implicitly_wait(60)
         time.sleep(10)
         
-        # Get price of product
-        search_results = driver.find_elements(By.CSS_SELECTOR, '[data-component-type="s-search-result"]')
-        for search_result in search_results:
-            # Check if sponsored post
-            if len(search_result.find_elements(By.CLASS_NAME, 'puis-label-popover.puis-sponsored-label-text')) > 0: continue
-            
-            possible_prices = search_result.find_elements(By.CLASS_NAME, 'a-price-whole')
-            if len(possible_prices) > 0: 
-                price = possible_prices[0].text.replace(',','')
-                product.add_price(float(price))
-                break
-        
-        self.end(driver)
-        return product
+        try:
+            # Get price of product
+            search_results = driver.find_elements(By.CSS_SELECTOR, '[data-component-type="s-search-result"]')
+            for search_result in search_results:
+                # Check if sponsored post
+                if len(search_result.find_elements(By.CLASS_NAME, 'puis-label-popover.puis-sponsored-label-text')) > 0: continue
+                
+                possible_prices = search_result.find_elements(By.CLASS_NAME, 'a-price-whole')
+                if len(possible_prices) > 0: 
+                    price = possible_prices[0].text.replace(',','')
+                    product.add_price(float(price))
+                    break
+        except NoSuchElementException as e:
+            print(e)
+            print(product)
+        finally:        
+            self.end(driver)
+            return product
     
     def get_img_url(self, product):
-        googe_img_url = 'https://www.google.com/search?q=' + product.name + '+official+product+image&udm=2'
+        # If img_url exist, don't scrape
+        if product.get_img_url():
+            return product
+        
+        googe_img_url = 'https://www.google.com/search?q=' + '+'.join(product.name.split()) + '+official+product+image&udm=2'
         
         driver = self.start(googe_img_url)
         print(googe_img_url)
-        
-        # Need additional waiting cause google also special, might block if too fast
-        driver.implicitly_wait(60)
-        time.sleep(10)
-        
-        # Get img url
-        img_wrapper = driver.find_element(By.XPATH, '//div[@jsname="dTDiAc"]')
-        driver.implicitly_wait(3)
-        img_wrapper.click()
-        raw_img_url = img_wrapper.find_element(By.TAG_NAME, 'a').get_attribute('href')
-        
-        # Parsing image url
-        encoded_img_url = raw_img_url.split('&imgurl=')[1].split('&')[0]
-        
-        # Decode url with urllib
-        url = unquote(encoded_img_url)
-        product.add_img_url(url)
-        
-        self.end(driver)
-        return product
+        try:
+            # Need additional waiting cause google also special, might block if too fast
+            driver.implicitly_wait(60)
+            time.sleep(15)
+            
+            # Get img url
+            imgs_wrapper = driver.find_element(By.XPATH, '//div[@data-id="mosaic"]')
+            driver.implicitly_wait(30)
+            img_wrapper = imgs_wrapper.find_element(By.XPATH, '//div[@jsname="dTDiAc"]')
+            driver.implicitly_wait(30)
+            img_wrapper.click()
+            raw_img_url = img_wrapper.find_element(By.TAG_NAME, 'a').get_attribute('href')
+            
+            # Parsing image url
+            encoded_img_url = raw_img_url.split('&imgurl=')[1].split('&')[0]
+            
+            # Decode url with urllib
+            url = unquote(encoded_img_url)
+            product.add_img_url(url)
+        except NoSuchElementException as e:
+            print(product)
+            print(e)
+        finally:
+            self.end(driver)
+            return product
     
     # *_name keeps track list of product names to prevent repeated scrapping of the same product
     def reset_names(self):
