@@ -37,6 +37,7 @@ class Laptop(Product):
         return [
             'weight',
             'screen_size',
+            'screen_resolution'
         ]
     
     def combine(self, product):
@@ -72,7 +73,10 @@ class Laptop(Product):
         if pounds:
             self.weight = round(weight/2.205, 2)
         else:
-            self.weight = weight
+            if weight > 100:
+                self.weight = weight/100
+            else:
+                self.weight = weight
     
     def add_screen_size(self, screen_size: float):
         self.screen_size = screen_size

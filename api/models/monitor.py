@@ -33,6 +33,7 @@ class Monitor(Product):
         return [
             'screen_size',
             'refresh_rate',
+            'screen_resolution',
         ]
     
     def combine(self, product):

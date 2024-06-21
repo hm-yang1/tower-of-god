@@ -23,8 +23,14 @@ class Television(Product):
         return [
             'screen_size',
             'screen_resolution',
-            'refresh_rate',
             'panel_type'
+        ]
+        
+    @classmethod
+    def get_orders(cls):
+        return [
+            'screen_size',
+            'screen_resolution',
         ]
     
     def combine(self, product):

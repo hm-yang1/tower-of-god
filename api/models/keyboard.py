@@ -16,8 +16,8 @@ class Keyboard(Product):
     @classmethod
     def get_vectors(cls):
         # cast bool fields to char
-        vector = SearchVector('earphone_type', weight = 'A')
-        vector += SearchVector(
+        vector = SearchVector('key_switches', weight = 'A')
+        vector = SearchVector(
             Case(
                 When(wireless = True, then=Value('wireless')),
                 When(wireless = False, then=Value('wired')),

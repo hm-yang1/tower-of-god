@@ -34,7 +34,8 @@ class Phone(Product):
     @classmethod
     def get_orders(cls):
         return [
-            'screen_size'
+            'screen_size',
+            'screen_resolution'
         ]
     
     def combine(self, product):
