@@ -47,14 +47,5 @@ class ComparisonViewSet(ReadOnlyModelViewSet):
         print(search_string)
         
         # Search for product name.
-        query = SearchQuery(search_string)
-        
-        # Only one search vector, name of product
-        vector = SearchVector('name')
-        
-        # Full text SearchRank with SearchQeury and SearchVectors
-        queryset = model.objects.annotate(rank = SearchRank(
-            vector, 
-            query,
-        )).order_by("-rank")
+        queryset = model.objects.filter(name__contains=search_string)
         return queryset
