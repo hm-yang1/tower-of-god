@@ -14,7 +14,7 @@ class Command(Command):
         product_categories = scrapper.categories.values()
         
         for Product in product_categories:
-            print('Saving: ' + str(Product.get_name()))
+            print('Saving: ' + str(Product))
             for product in Product.objects.all():
                 # Pass if there is already an image
                 if product.get_img(): continue
@@ -29,12 +29,14 @@ class Command(Command):
                     
                     if file_content:
                         # Define file name with url
-                        file_name = img_url.split('/')[-1]
+                        file_name = product.get_name().split('/')[-1].replace(" ", '_') +'.jpg'
                         
                         # Save image to azure blob and get back url
                         file_path = default_storage.save(f'products/{file_name}', file_content)
                         product.add_img(file_path)
                         product.save()
+                        break
+            break
         return
     
     def get_img_from_url(self, url:str):

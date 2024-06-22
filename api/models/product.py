@@ -11,7 +11,7 @@ class Product(models.Model):
     brand = models.CharField(max_length=255)
     
     # Image reference to aws s3 bucket, needs testing
-    img = models.ImageField(upload_to='products/', null=True)
+    img = models.ImageField(max_length=1000, upload_to='products/', null=True)
     img_url = models.URLField(max_length=500, null=True, blank=True)
     
     price = models.FloatField(blank=True, null=True)
@@ -92,7 +92,6 @@ class Product(models.Model):
         self.img_url = url
     
     def add_img(self, file_path:str):
-        if self.img: return
         self.img.name = file_path
             
     def get_name(self) -> str:
