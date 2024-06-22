@@ -176,7 +176,7 @@ AZURE_CONTAINER = os.environ.get('AZURE_CONTAINER')
 AZURE_ACCOUNT_KEY = os.environ.get('AZURE_ACCOUNT_KEY')
 AZURE_LOCATION = os.environ.get('AZURE_LOCATION')
 AZURE_CONNECTION_TIMEOUT_SECS = os.environ.get('AZURE_CONNECTION_TIMEOUT_SECS')
-MEDIA_URL = f'https://{os.environ.get('AZURE_ACCOUNT_NAME')}.blob.core.windows.net/{os.environ.get('AZURE_CONTAINER')}/media/'
+MEDIA_URL = f"https://{os.environ.get('AZURE_ACCOUNT_NAME')}.blob.core.windows.net/{os.environ.get('AZURE_CONTAINER')}/media/"
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
