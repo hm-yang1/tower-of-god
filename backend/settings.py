@@ -26,10 +26,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-&g2)59w@bt(rp!$%2m9=z0uc08(rt$gqi4u20iu1h6l^zcj!o#'
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = []
 
@@ -108,7 +108,6 @@ AUTH_USER_MODEL = 'api.User'
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
-    # 'http://127.0.0.1:5173',
 ]
 
 CORS_ALLOW_HEADERS = [
@@ -165,7 +164,6 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 DATABASES = {
     'default': dj_database_url.config(
-        # Replace this value with your local database's connection string.
         default='postgresql://super:yhm123@localhost:5432/towerofgod',
         conn_max_age=600
     )
