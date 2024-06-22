@@ -187,9 +187,18 @@ STORAGES = {
     },
     "staticfiles": {
         "BACKEND": "storages.backends.azure_storage.AzureStorage",
-    }
+        "OPTIONS": {
+            "account_name": os.environ.get('AZURE_ACCOUNT_NAME'),
+            "azure_container": os.environ.get('AZURE_CONTAINER'),
+            "account_key": os.environ.get('AZURE_ACCOUNT_KEY'),
+            "location": 'static',
+            "timeout": 30,
+            "expiration_secs": None
+        }
+    }   
 }
 MEDIA_URL = f'https://{os.environ.get('AZURE_ACCOUNT_NAME')}.blob.core.windows.net/{os.environ.get('AZURE_CONTAINER')}/media/'
+STATIC_URL = f'https://{os.environ.get('AZURE_ACCOUNT_NAME')}.blob.core.windows.net/{os.environ.get('AZURE_CONTAINER')}/static/'
 
 
 # Password validation
