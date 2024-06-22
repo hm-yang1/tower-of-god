@@ -10,6 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
+# I have updated some stuff on main
+
 import os
 from django.conf import settings
 from dotenv import load_dotenv
