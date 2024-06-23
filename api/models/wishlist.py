@@ -1,7 +1,6 @@
 from unittest.util import _MAX_LENGTH
 from django.db import models
 from .user import User
-from .category import Category
 from rest_framework import serializers
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
