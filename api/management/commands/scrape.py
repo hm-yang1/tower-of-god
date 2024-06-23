@@ -30,7 +30,7 @@ class Command(BaseCommand):
                     score_cutoff= 85
                 )
                 print('common product name: ' + str(common_name))
-                if common_name and common_name[1] > 85:
+                if common_name:
                     existing_product = Product.objects.get(name=common_name[0])
                     
                     # Skip if same review url exist
@@ -53,7 +53,7 @@ def main():
         'Dell Alienware m18 R2 (2024)'
     ]
     
-    name = 'Apple MacBook Pro 14 m4'
+    name = 'Lenovo IdeaPad Slim 3i 14(2024)'
     
     print(process.extractOne(name, names, scorer=fuzz.token_ratio, processor=utils.default_process))
 
