@@ -4,7 +4,6 @@ from rest_framework.routers import DefaultRouter
 
 from .views.wishlist_views import WishlistViewSet
 from .views.user_views import LoginView, LogoutView, RegisterView
-from .views.category_view import CategoryView
 from .views.product_views import ProductViewSet
 from .views.comparison_views import ComparisonViewSet
 
