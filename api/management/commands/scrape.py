@@ -25,7 +25,7 @@ class Command(BaseCommand):
                 common_name = process.extractOne(
                     product.get_name(), 
                     existing_names, 
-                    scorer=fuzz.ratio, 
+                    scorer=fuzz.token_sort_ratio, 
                     processor = utils.default_process, 
                     score_cutoff= 90
                 )
@@ -39,24 +39,24 @@ class Command(BaseCommand):
                     existing_product.combine(product)
                     existing_product.save()
                     continue
-                
+            
             product.save()
 
 def main():
     names = [
         'APPLE MACBOOK Pro 14 M3', 
-        'Apple MacBook Air 13 (2024)', 
+        'Apple MacBook Air 13 m1 (2024)', 
         'Lenovo Yoga 7i 16 (2023)', 
         'ASUS Vivobook 16 M1605 (2023)',
         'Lenovo IdeaPad Slim 3i Chromebook 14 (2023)',
         'Microsoft Surface Pro 8 (2021)',
         'Dell Alienware m18 R2 (2024)',
-        'Lenovo Chromebook Duet 3 (2022)'
+        'Lenovo Chromebook Duet 9 (2022)'
     ]
     
-    name = 'Apple MacBook Air 13 (2022)'
+    name = 'Apple MacBook Air 13 m2 (2024)'
     
-    print(process.extractOne(name, names, scorer=fuzz.token_ratio, processor=utils.default_process))
+    print(process.extractOne(name, names, scorer=fuzz.token_sort_ratio, processor=utils.default_process))
 
 if __name__ == "__main__":
     main()
