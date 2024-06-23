@@ -27,7 +27,7 @@ class Command(BaseCommand):
                     existing_names, 
                     scorer=fuzz.ratio, 
                     processor = utils.default_process, 
-                    score_cutoff= 85
+                    score_cutoff= 90
                 )
                 print('common product name: ' + str(common_name))
                 if common_name:
@@ -50,10 +50,11 @@ def main():
         'ASUS Vivobook 16 M1605 (2023)',
         'Lenovo IdeaPad Slim 3i Chromebook 14 (2023)',
         'Microsoft Surface Pro 8 (2021)',
-        'Dell Alienware m18 R2 (2024)'
+        'Dell Alienware m18 R2 (2024)',
+        'Lenovo Chromebook Duet 3 (2022)'
     ]
     
-    name = 'Lenovo IdeaPad Slim 3i 14(2024)'
+    name = 'Apple MacBook Air 13 (2022)'
     
     print(process.extractOne(name, names, scorer=fuzz.token_ratio, processor=utils.default_process))
 
