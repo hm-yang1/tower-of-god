@@ -164,7 +164,7 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.environ.get('DB_CONNECTION_STRING'),
+        default=os.environ.get('DATABASE_URL'),
         conn_max_age=600
     )
 }
