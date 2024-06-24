@@ -104,23 +104,23 @@ class ProductViewSet(ReadOnlyModelViewSet):
         # ).order_by('-final_rank')
         return queryset
     
-    # def list(self, request, *args, **kwargs):
-    #     queryset = self.filter_queryset(self.get_queryset())
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
         
-    #     # Apply ordering
-    #     ordering = request.query_params.get('ordering', 'id')  # Default ordering by 'id'
-    #     queryset = queryset.order_by(ordering)
+        # Apply ordering
+        ordering = request.query_params.get('ordering', 'id')  # Default ordering by 'id'
+        queryset = queryset.order_by(ordering)
         
-    #     # Manually limit the queryset to at most 20 items
-    #     limited_queryset = queryset[:20]
+        # Manually limit the queryset to at most 20 items
+        limited_queryset = queryset[:20]
         
-    #     page = self.paginate_queryset(limited_queryset)
-    #     if page is not None:
-    #         serializer = self.get_serializer(page, many=True)
-    #         return self.get_paginated_response(serializer.data)
+        page = self.paginate_queryset(limited_queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
 
-    #     serializer = self.get_serializer(limited_queryset, many=True)
-    #     return Response(serializer.data)
+        serializer = self.get_serializer(limited_queryset, many=True)
+        return Response(serializer.data)
     
     def reset(self):
         self.filterset_fields = ['brand', 'price', 'review_date']
