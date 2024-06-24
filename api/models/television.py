@@ -44,6 +44,9 @@ class Television(Product):
         
         return self
     
+    def get_category_display(self):
+        return 'television'
+    
     def add_price(self, price: float):
         if price and price > 100:
             self.price = price

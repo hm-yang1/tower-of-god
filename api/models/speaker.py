@@ -70,6 +70,9 @@ class Speaker(Product):
         
         return self
     
+    def get_category_display(self):
+        return 'speaker'
+    
     def add_portable(self, portable: bool):
         self.portable = portable
     

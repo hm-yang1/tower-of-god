@@ -80,6 +80,8 @@ class Phone(Product):
         return string
         
 class PhoneSerializer(serializers.ModelSerializer):
+    category = serializers.CharField(source='get_category_display', read_only=True)
+    
     class Meta:
         model = Phone
         fields = '__all__'
