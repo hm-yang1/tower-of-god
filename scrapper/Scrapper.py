@@ -79,7 +79,7 @@ class Scrapper:
         try:
             # Need additional waiting cause google also special, might block if too fast
             driver.implicitly_wait(60)
-            time.sleep(15)
+            time.sleep(10)
             
             # Get img url
             img_wrapper = driver.find_element(By.XPATH, '//div[@jsname="dTDiAc"]')
