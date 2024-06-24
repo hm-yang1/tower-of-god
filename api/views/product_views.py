@@ -3,6 +3,7 @@ from django.db.models import Count, F
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django_filters.rest_framework import DjangoFilterBackend
 from rapidfuzz import process, fuzz, utils
@@ -14,23 +15,6 @@ from ..models.mouse import Mouse, MouseSerializer
 from ..models.phone import Phone, PhoneSerializer
 from ..models.speaker import Speaker, SpeakerSerializer
 from ..models.television import Television, TelevisionSerializer
-
-# Custom ordering filter to always sort null values to the bottom
-class NullsAlwaysLastOrderingFilter(OrderingFilter):
-    def filter_queryset(self, request, queryset, view):
-        ordering = self.get_ordering(request, queryset, view)
-        if ordering:
-            f_ordering = []
-            for o in ordering:
-                if not o:
-                    continue
-                if o[0] == '-':
-                    f_ordering.append(F(o[1:]).desc(nulls_last=True))
-                else:
-                    f_ordering.append(F(o).asc(nulls_last=True))
-            return queryset.order_by(*f_ordering)
-        print('Entered custom ordering')
-        return queryset
 
 # Viewset to query all products
 class ProductViewSet(ReadOnlyModelViewSet):
@@ -51,7 +35,7 @@ class ProductViewSet(ReadOnlyModelViewSet):
     # authentication_classes = [JWTAuthentication]
     # permission_classes = [IsAuthenticated]
     
-    filter_backends = [SearchFilter, NullsAlwaysLastOrderingFilter, DjangoFilterBackend]
+    filter_backends = [SearchFilter, OrderingFilter, DjangoFilterBackend]
     
     # After determining category, extend filter fields
     filterset_fields = ['brand', 'price', 'review_date']
@@ -117,6 +101,24 @@ class ProductViewSet(ReadOnlyModelViewSet):
         #     final_rank=F('search_rank') * 0.3 + F('num_reviews') * 0.7
         # ).order_by('-final_rank')
         return queryset
+    
+    # def list(self, request, *args, **kwargs):
+    #     queryset = self.filter_queryset(self.get_queryset())
+        
+    #     # Apply ordering
+    #     ordering = request.query_params.get('ordering', 'id')  # Default ordering by 'id'
+    #     queryset = queryset.order_by(ordering)
+        
+    #     # Manually limit the queryset to at most 20 items
+    #     limited_queryset = queryset[:20]
+        
+    #     page = self.paginate_queryset(limited_queryset)
+    #     if page is not None:
+    #         serializer = self.get_serializer(page, many=True)
+    #         return self.get_paginated_response(serializer.data)
+
+    #     serializer = self.get_serializer(limited_queryset, many=True)
+    #     return Response(serializer.data)
     
     def reset(self):
         self.filterset_fields = ['brand', 'price', 'review_date']
