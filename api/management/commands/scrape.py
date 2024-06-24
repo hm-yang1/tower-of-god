@@ -20,14 +20,15 @@ class Command(BaseCommand):
             # If not exist, just save, return
             # If same review url, just return, dont save
             # If different review url, add to description, pros, cons and review then save
+            if not product: continue
             
             if existing_names:
                 common_name = process.extractOne(
                     product.get_name(), 
                     existing_names, 
-                    scorer=fuzz.token_sort_ratio, 
+                    scorer=fuzz.token_ratio, 
                     processor = utils.default_process, 
-                    score_cutoff= 90
+                    score_cutoff= 85
                 )
                 print('common product name: ' + str(common_name))
                 if common_name:
@@ -39,7 +40,8 @@ class Command(BaseCommand):
                     existing_product.combine(product)
                     existing_product.save()
                     continue
-            
+                
+            existing_names.append(product.get_name())
             product.save()
 
 def main():
