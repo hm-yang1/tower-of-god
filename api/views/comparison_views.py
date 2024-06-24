@@ -46,6 +46,7 @@ class ComparisonViewSet(ReadOnlyModelViewSet):
         search_string = str(self.request.query_params.get('q', None))
         print(search_string)
         
-        # Search for product name.
-        queryset = model.objects.filter(name__contains=search_string)
+        queryset = model.objects.filter(name__icontains=search_string)
+        
+        print(str(queryset))
         return queryset
