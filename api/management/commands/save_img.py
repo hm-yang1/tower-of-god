@@ -35,8 +35,6 @@ class Command(Command):
                         file_path = default_storage.save(f'products/{file_name}', file_content)
                         product.add_img(file_path)
                         product.save()
-                        break
-            break
         return
     
     def get_img_from_url(self, url:str):
