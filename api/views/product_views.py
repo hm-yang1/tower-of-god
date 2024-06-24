@@ -95,6 +95,8 @@ class ProductViewSet(ReadOnlyModelViewSet):
             normalization = 4,
         )).order_by("-rank")
         
+        print(queryset)
+        
         # Additional weights with no. of reviews and reddit sentiment. Eg.
         
         # queryset = queryset.annotate(
