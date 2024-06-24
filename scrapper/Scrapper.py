@@ -82,10 +82,8 @@ class Scrapper:
             time.sleep(15)
             
             # Get img url
-            imgs_wrapper = driver.find_element(By.XPATH, '//div[@data-id="mosaic"]')
-            driver.implicitly_wait(30)
-            img_wrapper = imgs_wrapper.find_element(By.XPATH, '//div[@jsname="dTDiAc"]')
-            driver.implicitly_wait(30)
+            img_wrapper = driver.find_element(By.XPATH, '//div[@jsname="dTDiAc"]')
+            driver.implicitly_wait(60)
             img_wrapper.click()
             raw_img_url = img_wrapper.find_element(By.TAG_NAME, 'a').get_attribute('href')
             
