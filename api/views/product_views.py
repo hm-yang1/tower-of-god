@@ -52,7 +52,7 @@ class ProductViewSet(ReadOnlyModelViewSet):
     # authentication_classes = [JWTAuthentication]
     # permission_classes = [IsAuthenticated]
     
-    filter_backends = [SearchFilter, OrderingFilter, DjangoFilterBackend]
+    filter_backends = [SearchFilter, NullsAlwaysLastOrderingFilter, DjangoFilterBackend]
     
     # After determining category, extend filter fields
     filterset_fields = ['brand', 'price', 'review_date']
