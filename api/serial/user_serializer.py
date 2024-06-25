@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 from ..models.user import User
 
 class UserRegisterSerializer(serializers.Serializer):
@@ -6,6 +7,9 @@ class UserRegisterSerializer(serializers.Serializer):
     password = serializers.CharField()
     
     def create(self, validated_data) -> User:
+        if not validated_data['password'] or len(validated_data['password'])<2:
+            raise ValidationError({'password': ["Invalid Password"]})
+        
         user = User(
             username = validated_data['username'],
         )
