@@ -1,0 +1,4 @@
+from .test_comparison_views import ComparisonViewSetTests
+from .test_product_views import ProductViewSetTests
+from .test_user_views import UserViewsTest
+from .test_wishlist_views import WishlistViewSetTest
