@@ -23,7 +23,6 @@ class Phone(Product):
     @classmethod
     def get_filters(cls):
         return [
-            'battery_life',
             'os_version',
             'size',
             'screen_resolution',
