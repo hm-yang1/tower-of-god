@@ -21,18 +21,25 @@ class RegisterView(APIView):
         serializer = UserRegisterSerializer(data=data)
         
         if serializer.is_valid():
-            user = serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response({'error': 'Invalid data'}, serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                user = serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            except Exception as e:
+                return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginView(APIView):
     permission_classes = [permissions.AllowAny]
                 
     def post(self, request):
         # Disallow user from logging in again, works only if sends bearer token
-        print(request.user)
         if request.user.is_authenticated:
             return Response({'error': 'Already logged in'}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        if not request.data.get('username'):
+            return Response({'error':'No username or password'}, status=status.HTTP_400_BAD_REQUEST)
+        if not request.data.get('password'):
+            return Response({'error':'No username or password'}, status=status.HTTP_400_BAD_REQUEST)
         
         username = request.data['username']
         password = request.data['password']
@@ -53,7 +60,6 @@ class LogoutView(APIView):
     def post(self, request):
         # Getting refresh token
         refresh_token = request.headers.get('refresh-token')
-        print(refresh_token)
 
         if not refresh_token:
             return Response({'error': 'Refresh token is required'}, status=status.HTTP_400_BAD_REQUEST)
@@ -63,7 +69,7 @@ class LogoutView(APIView):
             
             return Response({'success': 'Successfully logged out'}, status=status.HTTP_200_OK)
         except Exception as e:
-            return Response({"message": "Invalid or expired token.", "error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": "Invalid or expired token.", "error": str(e)}, status=status.HTTP_401_UNAUTHORIZED)
         
 class ProfileView(APIView):
     pass

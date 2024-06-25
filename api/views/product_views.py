@@ -1,5 +1,6 @@
 from django.contrib.postgres.search import SearchQuery, SearchVector, SearchRank
 from django.db.models import Count, F
+from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_framework.filters import SearchFilter, OrderingFilter
@@ -19,7 +20,9 @@ from ..models.television import Television, TelevisionSerializer
 # Custom ordering filter to always sort null values to the bottom
 class NullsAlwaysLastOrderingFilter(OrderingFilter):
     def filter_queryset(self, request, queryset, view):
+        print('Entered custom ordering')
         ordering = self.get_ordering(request, queryset, view)
+        
         if ordering:
             f_ordering = []
             for o in ordering:
@@ -30,7 +33,7 @@ class NullsAlwaysLastOrderingFilter(OrderingFilter):
                 else:
                     f_ordering.append(F(o).asc(nulls_last=True))
             return queryset.order_by(*f_ordering)
-        print('Entered custom ordering')
+        
         return queryset
 
 # Viewset to query all products
@@ -67,7 +70,10 @@ class ProductViewSet(ReadOnlyModelViewSet):
         
         # Get search query from http request
         search_string = str(self.request.query_params.get('q', None))
-        print(search_string)
+        print('Search string: ' + search_string)
+        
+        if not search_string or search_string=='None':
+            raise ValidationError("search query not found")
         
         # Fuzzy search to determine category
         choices = list(self.categories.keys())
