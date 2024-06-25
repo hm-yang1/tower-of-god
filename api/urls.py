@@ -1,3 +1,4 @@
+from posixpath import basename
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
@@ -15,9 +16,9 @@ router.register(r'wishlist', WishlistViewSet, basename='wishlist')
 
 urlpatterns = [
     # Authentication Urls
-    path('register/', RegisterView.as_view()),
-    path('login/', LoginView.as_view()),
-    path('logout/', LogoutView.as_view()),
+    path('register/', RegisterView.as_view(), name='register'),
+    path('login/', LoginView.as_view(), name='login'),
+    path('logout/', LogoutView.as_view(), name='logout'),
     
     # Get URLs
     path('', include(router.urls)),
