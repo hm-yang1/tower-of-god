@@ -75,7 +75,7 @@ class WishlistViewSet(ModelViewSet):
         # Check if item already exist in wishlist
         queryset = self.get_queryset()
         if queryset.filter(content_type=content_type, object_id=object_id).exists():
-            return Response({'error': 'Item already exists in your wishlist'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Item already exists in your wishlist'}, status=status.HTTP_409_CONFLICT)
 
         # Create a wishlist item
         wishlist_item = Wishlist.objects.create(
