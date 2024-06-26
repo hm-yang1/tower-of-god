@@ -137,6 +137,7 @@ class UserViewsTest(APITestCase):
         response = self.test_login()
         refresh = response.data.get('refresh')
         access = response.data.get('access')
+        self.client.credentials()
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {access}')
         headers = {
             'refresh-token':refresh
@@ -154,6 +155,7 @@ class UserViewsTest(APITestCase):
         refresh = response.data.get('refresh')
         access = response.data.get('access')
         access = str(access) + 'really bad access'
+        self.client.credentials()
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {access}')
         headers = {
             'refresh-token': refresh
@@ -204,6 +206,7 @@ class UserViewsTest(APITestCase):
         response = self.test_login()
         refresh = response.data.get('refresh')
         access = response.data.get('access')
+        self.client.credentials()
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {access}')
         response = self.client.post(
             reverse('logout'),
