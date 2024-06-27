@@ -1,11 +1,12 @@
 from django.contrib.postgres.search import SearchQuery, SearchVector, SearchRank
-from django.db.models import Count, F
+from django.db.models import Count, F, Value, IntegerField
+from django.db.models.functions import Coalesce
+from django.db.models.expressions import Func
+from rest_framework import status
 from rest_framework.exceptions import ValidationError
-from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.response import Response
-from rest_framework_simplejwt.authentication import JWTAuthentication
 from django_filters.rest_framework import DjangoFilterBackend
 from rapidfuzz import process, fuzz, utils
 from ..models.earbuds import Earbuds, EarbudSerializer
@@ -52,13 +53,10 @@ class ProductViewSet(ReadOnlyModelViewSet):
         'television': [Television, TelevisionSerializer],
     }
     
-    # authentication_classes = [JWTAuthentication]
-    # permission_classes = [IsAuthenticated]
-    
-    filter_backends = [SearchFilter, NullsAlwaysLastOrderingFilter, DjangoFilterBackend]
+    filter_backends = [SearchFilter, DjangoFilterBackend, OrderingFilter, ]
     
     # After determining category, extend filter fields
-    filterset_fields = ['brand', 'price', 'review_date']
+    filterset_fields = {}
     
     # Ordering fields, extend after determining category
     ordering_fields = ['price', 'review_date']
@@ -94,7 +92,7 @@ class ProductViewSet(ReadOnlyModelViewSet):
         self.serializer_class = cat_info[1]
         
         # Extend filterset_fields
-        self.filterset_fields = self.filterset_fields + model.get_filters()
+        self.filterset_fields.update(model.get_filters())
         print(self.filterset_fields)
         
         # Extend odering_fields
@@ -112,19 +110,54 @@ class ProductViewSet(ReadOnlyModelViewSet):
         vector += model.get_vectors()
         
         # Full text SearchRank with SearchQeury and SearchVectors
-        queryset = model.objects.annotate(rank = SearchRank(
-            vector, 
-            query,
-            normalization = 4,
-        )).order_by("-rank")
-                
-        # Additional weights with no. of reviews and reddit sentiment. Eg.
-        
-        # queryset = queryset.annotate(
-        #     final_rank=F('search_rank') * 0.3 + F('num_reviews') * 0.7
-        # ).order_by('-final_rank')
+        # Also added weights for num_reviews and score, score will be for later
+        queryset = model.objects.annotate(
+            rank=SearchRank(vector, query, normalization=4),
+            num_reviews=Coalesce(Func(F('reviews'), function='jsonb_array_length', output_field=IntegerField()), Value(0)),
+            score_weight=Coalesce(F('score'), Value(0))
+        ).annotate(
+            weighted_rank=F('rank') + F('num_reviews') * 0.1 + F('score_weight') * 0.3
+        ).order_by('-weighted_rank')
         return queryset
     
+    # Override list method for custom additional information in the response
+    # def list(self, request, *args, **kwargs):
+    #     queryset = self.filter_queryset(self.get_queryset())
+    #     model = queryset.model
+        
+    #     # Additional info for filter fields in response
+    #     # Get values of filter fields
+    #     filter_info = {}
+    #     filter_info['brand'] = list(model.objects.values_list('brand').distinct())
+        
+        
+    #     # Pagination
+    #     page = self.paginate_queryset(queryset)
+    #     if page is not None:
+    #         serializer = self.get_serializer(page, many=True)
+
+    #         # Aggregate brand names
+    #         brand_names = list(model.objects.values_list('brand', flat=True).distinct())
+
+    #         # Add aggregated data to response
+    #         data = {
+    #             'products': serializer.data,
+    #             'brands': brand_names,
+    #         }
+    #         return self.get_paginated_response(data)
+
+    #     serializer = self.get_serializer(queryset, many=True)
+
+    #     # Aggregate brand names (for non-paginated response)
+    #     brand_names = list(Brand.objects.values_list('name', flat=True))
+
+    #     # Add aggregated data to response
+    #     data = {
+    #         'products': serializer.data,
+    #         'brands': brand_names,
+    #     }
+    #     return Response(data, status=status.HTTP_200_OK)
+    
     def reset(self):
-        self.filterset_fields = ['brand', 'price', 'review_date']
+        self.filterset_fields = {}
         self.ordering_fields = ['price', 'review_date']

@@ -39,12 +39,18 @@ class Earbuds(Product):
     # Additional filter fields
     @classmethod
     def get_filters(cls):
-        return [
-            'earphone_type',
-            'wireless',
-            'battery_life',
-            'active_noise_cancellation',
-        ]
+        result = super().get_filters()
+        
+        filter_fields = {
+            'earphone_type': ['exact'],
+            'wireless': ['exact'],
+            'battery_life': ['exact', 'gte', 'lte'],
+            'active_noise_cancellation': ['exact'],
+        }
+        result.update(filter_fields)
+        return result
+        
+    # Some
         
     # Additional ordering fields
     @classmethod
