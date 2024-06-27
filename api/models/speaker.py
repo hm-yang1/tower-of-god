@@ -55,6 +55,20 @@ class Speaker(Product):
         result.update(filter_fields)
         return result
     
+    # Get filter fields with specific results
+    @classmethod
+    def get_specific_filters(cls):
+        result = super().get_specific_filters()
+        filter_fields = [
+            'portable',
+            'bluetooth',
+            'wifi',
+            'speakerphone'
+        ]
+        
+        result.extend(filter_fields)
+        return result
+    
     # Additional ordering fields
     @classmethod
     def get_orders(cls):

@@ -28,7 +28,18 @@ class Television(Product):
         }
         result.update(filter_fields)
         return result
+    
+    # Get filter fields with specific results
+    @classmethod
+    def get_specific_filters(cls):
+        result = super().get_specific_filters()
+        filter_fields = [
+            'panel_type',
+        ]
         
+        result.extend(filter_fields)
+        return result
+    
     @classmethod
     def get_orders(cls):
         return [
