@@ -121,42 +121,40 @@ class ProductViewSet(ReadOnlyModelViewSet):
         return queryset
     
     # Override list method for custom additional information in the response
-    # def list(self, request, *args, **kwargs):
-    #     queryset = self.filter_queryset(self.get_queryset())
-    #     model = queryset.model
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        model = queryset.model
         
-    #     # Additional info for filter fields in response
-    #     # Get values of filter fields
-    #     filter_info = {}
-    #     filter_info['brand'] = list(model.objects.values_list('brand').distinct())
+        # Additional info for filter fields in response
+        # Get values of filter fields
+        filter_info = {}
+        filter_fields = model.get_specific_filters()
+        for field in filter_fields:
+            values = list(model.objects.values_list(field).distinct())
+            filter_info[str(field)] = values
         
-        
-    #     # Pagination
-    #     page = self.paginate_queryset(queryset)
-    #     if page is not None:
-    #         serializer = self.get_serializer(page, many=True)
+        # Pagination
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
 
-    #         # Aggregate brand names
-    #         brand_names = list(model.objects.values_list('brand', flat=True).distinct())
+            # Add aggregated data to response
+            data = {
+                'filters': filter_info,
+                'products': serializer.data,
+            }
+            filter_info = {}
+            return self.get_paginated_response(data)
 
-    #         # Add aggregated data to response
-    #         data = {
-    #             'products': serializer.data,
-    #             'brands': brand_names,
-    #         }
-    #         return self.get_paginated_response(data)
+        serializer = self.get_serializer(queryset, many=True)
 
-    #     serializer = self.get_serializer(queryset, many=True)
-
-    #     # Aggregate brand names (for non-paginated response)
-    #     brand_names = list(Brand.objects.values_list('name', flat=True))
-
-    #     # Add aggregated data to response
-    #     data = {
-    #         'products': serializer.data,
-    #         'brands': brand_names,
-    #     }
-    #     return Response(data, status=status.HTTP_200_OK)
+        # If no pagination
+        data = {
+            'filters': filter_info,
+            'products': serializer.data,
+        }
+        filter_info = {}
+        return Response(data, status=status.HTTP_200_OK)
     
     def reset(self):
         self.filterset_fields = {}
