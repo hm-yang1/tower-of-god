@@ -72,19 +72,23 @@ class ProductViewSet(ReadOnlyModelViewSet):
         
         if not search_string or search_string=='None':
             raise ValidationError("search query not found")
-        
-        # Fuzzy search to determine category
-        choices = list(self.categories.keys())
-        
-        # Scorers set to default ratio for now
-        print(process.extractOne(search_string, choices, scorer=fuzz.ratio, processor= utils.default_process))
-        category = process.extractOne(search_string, choices, scorer=fuzz.ratio, processor= utils.default_process)[0]
-        
-        # Remove category from search_string
-        words = search_string.split()
-        closest_match = process.extractOne(category, words, scorer=fuzz.token_ratio)[0]
-        words.remove(closest_match)
-        search_string = ' '.join(words)
+            
+        # if the category params is given, use that, else do fuzzy search for category
+        if category_string:
+            category = category_string
+        else:
+            # Fuzzy search to determine category
+            choices = list(self.categories.keys())
+            
+            # Scorers set to default ratio for now
+            print(process.extractOne(search_string, choices, scorer=fuzz.ratio, processor= utils.default_process))
+            category = process.extractOne(search_string, choices, scorer=fuzz.ratio, processor= utils.default_process)[0]
+                
+            # Remove category from search_string
+            words = search_string.split()
+            closest_match = process.extractOne(category, words, scorer=fuzz.token_ratio)[0]
+            words.remove(closest_match)
+            search_string = ' '.join(words)
         
         # doing setup after determining category
         cat_info = self.categories.get(category)
