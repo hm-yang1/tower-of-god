@@ -20,11 +20,14 @@ class Television(Product):
     # Additional filter fields
     @classmethod
     def get_filters(cls):
-        return [
-            'screen_size',
-            'screen_resolution',
-            'panel_type'
-        ]
+        result = super().get_filters()
+        filter_fields = {
+            'screen_size': ['exact', 'gte', 'lte'],
+            'screen_resolution': ['exact'],
+            'panel_type': ['exact', 'icontains'],
+        }
+        result.update(filter_fields)
+        return result
         
     @classmethod
     def get_orders(cls):

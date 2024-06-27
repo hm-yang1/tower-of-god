@@ -30,12 +30,15 @@ class Mouse(Product):
     # Additional filter fields
     @classmethod
     def get_filters(cls):
-        return [
-            'wireless',
-            'buttons_count',
-            'dpi',
-            'weight'
-        ]
+        result = super().get_filters()
+        filter_fields = {
+            'wireless': ['exact'],
+            'buttons_count': ['exact', 'gte', 'lte'],
+            'dpi': ['exact', 'gte', 'lte'],
+            'weight': ['exact', 'gte', 'lte'],
+        }
+        result.update(filter_fields)
+        return result
         
     # Additional ordering fields
     @classmethod

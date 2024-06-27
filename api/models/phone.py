@@ -22,12 +22,15 @@ class Phone(Product):
     # Additional filter fields
     @classmethod
     def get_filters(cls):
-        return [
-            'os_version',
-            'size',
-            'screen_resolution',
-            'processor',
-        ]
+        result = super().get_filters()
+        filter_fields = {
+            'os_version': ['exact', 'icontains'],
+            'size': ['exact', 'gte', 'lte'],
+            'screen_resolution': ['exact'],
+            'processor': ['exact', 'icontains'],
+        }
+        result.update(filter_fields)
+        return result
         
     # Additional ordering fields
     @classmethod

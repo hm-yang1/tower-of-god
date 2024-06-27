@@ -20,13 +20,16 @@ class Monitor(Product):
     # Additional filter fields
     @classmethod
     def get_filters(cls):
-        return [
-            'screen_size',
-            'screen_resolution',
-            'refresh_rate',
-            'panel_type'
-        ]
-    
+        result = super().get_filters()
+        filter_fields = {
+            'screen_size': ['exact', 'gte', 'lte'],
+            'screen_resolution': ['exact'],
+            'refresh_rate': ['exact', 'gte', 'lte'],
+            'panel_type': ['exact', 'icontains'],
+        }
+        result.update(filter_fields)
+        return result
+
     # Additional ordering fields
     @classmethod
     def get_orders(cls):

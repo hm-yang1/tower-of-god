@@ -30,11 +30,14 @@ class Keyboard(Product):
     # Additional filter fields
     @classmethod
     def get_filters(cls):
-        return [
-            'wireless',
-            'size',
-            'key_switches',
-        ]
+        result = super().get_filters()
+        filter_fields = {
+            'wireless': ['exact'],
+            'size': ['exact', 'gte', 'lte'],
+            'key_switches': ['exact', 'icontains'],
+        }
+        result.update(filter_fields)
+        return result
     
     # Additional ordering fields
     @classmethod

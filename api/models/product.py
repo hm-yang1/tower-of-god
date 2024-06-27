@@ -56,6 +56,15 @@ class Product(models.Model):
             self.review_date = product.review_date
         
         return self
+    
+    # Filter fields
+    @classmethod
+    def get_filters(cls) -> dict:
+        return {
+            'brand': ['exact', 'icontains'],
+            'price': ['exact', 'gte', 'lte'],
+            'review_date': ['exact', 'gte', 'lte'],
+        }
         
     def add_brand(self, name: str):
         self.brand = name

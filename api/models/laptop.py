@@ -23,13 +23,16 @@ class Laptop(Product):
     # Additional filter fields
     @classmethod
     def get_filters(cls):
-        return [
-            'weight',
-            'screen_size',
-            'screen_resolution',
-            'processor',
-            'os_version'
-        ]
+        result = super().get_filters()
+        filter_fields = {
+            'weight': ['exact', 'gte', 'lte'],
+            'screen_size': ['exact', 'gte', 'lte'],
+            'screen_resolution': ['exact'],
+            'processor': ['exact', 'icontains'],
+            'os_version': ['exact', 'icontains'],
+        }
+        result.update(filter_fields)
+        return result
     
     # Additional ordering fields
     @classmethod
