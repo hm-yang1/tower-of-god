@@ -104,7 +104,7 @@ class ProductViewSetTests(APITestCase):
         )).order_by("-rank")
         serializer = EarbudSerializer(products, many=True)
         
-        self.assertEqual(response.data.get('results'), serializer.data)
+        self.assertEqual(response.data.get('results').get('products'), serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
     def test_get_earbuds_with_ordering(self):
@@ -118,7 +118,7 @@ class ProductViewSetTests(APITestCase):
         )
         products = Earbuds.objects.order_by('review_date')
         serializer = EarbudSerializer(products, many=True)
-        self.assertEqual(response.data.get('results'), serializer.data)
+        self.assertEqual(response.data.get('results').get('products'), serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_get_earbuds_with_filters(self):
@@ -132,7 +132,7 @@ class ProductViewSetTests(APITestCase):
         )
         products = Earbuds.objects.all().filter(wireless = True)
         serializer = EarbudSerializer(products, many=True)
-        self.assertEqual(response.data.get('results'), serializer.data)
+        self.assertEqual(response.data.get('results').get('products'), serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
     
     # Keyboard Tests
@@ -152,7 +152,7 @@ class ProductViewSetTests(APITestCase):
         )).order_by("-rank")
         serializer = KeyboardSerializer(products, many=True)
         
-        self.assertEqual(response.data.get('results'), serializer.data)
+        self.assertEqual(response.data.get('results').get('products'), serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_get_keyboards_with_ordering(self):
@@ -166,7 +166,7 @@ class ProductViewSetTests(APITestCase):
         )
         products = Keyboard.objects.order_by('review_date')
         serializer = KeyboardSerializer(products, many=True)
-        self.assertEqual(response.data.get('results'), serializer.data)
+        self.assertEqual(response.data.get('results').get('products'), serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_get_keyboards_with_filters(self):
@@ -180,7 +180,7 @@ class ProductViewSetTests(APITestCase):
         )
         products = Keyboard.objects.filter(wireless=True)
         serializer = KeyboardSerializer(products, many=True)
-        self.assertEqual(response.data.get('results'), serializer.data)
+        self.assertEqual(response.data.get('results').get('products'), serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
     # Laptop Tests
@@ -200,7 +200,7 @@ class ProductViewSetTests(APITestCase):
         )).order_by("-rank")
         serializer = LaptopSerializer(products, many=True)
         
-        self.assertEqual(response.data.get('results'), serializer.data)
+        self.assertEqual(response.data.get('results').get('products'), serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_get_laptops_with_ordering(self):
@@ -214,7 +214,7 @@ class ProductViewSetTests(APITestCase):
         )
         products = Laptop.objects.order_by('review_date')
         serializer = LaptopSerializer(products, many=True)
-        self.assertEqual(response.data.get('results'), serializer.data)
+        self.assertEqual(response.data.get('results').get('products'), serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_get_keyboards_with_filters(self):
@@ -228,7 +228,7 @@ class ProductViewSetTests(APITestCase):
         )
         products = Laptop.objects.filter(weight=2.2)
         serializer = LaptopSerializer(products, many=True)
-        self.assertEqual(response.data.get('results'), serializer.data)
+        self.assertEqual(response.data.get('results').get('products'), serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
     
     # Monitor tests
@@ -248,7 +248,7 @@ class ProductViewSetTests(APITestCase):
         )).order_by("-rank")
         serializer = MonitorSerializer(products, many=True)
         
-        self.assertEqual(response.data.get('results'), serializer.data)
+        self.assertEqual(response.data.get('results').get('products'), serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
     def test_get_monitors_with_ordering(self):
@@ -262,7 +262,7 @@ class ProductViewSetTests(APITestCase):
         )
         products = Monitor.objects.order_by('review_date')
         serializer = MonitorSerializer(products, many=True)
-        self.assertEqual(response.data.get('results'), serializer.data)
+        self.assertEqual(response.data.get('results').get('products'), serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_get_monitors_with_filters(self):
@@ -276,7 +276,7 @@ class ProductViewSetTests(APITestCase):
         )
         products = Monitor.objects.filter(screen_size=27)
         serializer = MonitorSerializer(products, many=True)
-        self.assertEqual(response.data.get('results'), serializer.data)
+        self.assertEqual(response.data.get('results').get('products'), serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     # Mouse tests
@@ -296,7 +296,7 @@ class ProductViewSetTests(APITestCase):
         )).order_by("-rank")
         serializer = MouseSerializer(products, many=True)
         
-        self.assertEqual(response.data.get('results'), serializer.data)
+        self.assertEqual(response.data.get('results').get('products'), serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_get_mice_with_ordering(self):
@@ -310,7 +310,7 @@ class ProductViewSetTests(APITestCase):
         )
         products = Mouse.objects.order_by('-price')
         serializer = MouseSerializer(products, many=True)
-        self.assertEqual(response.data.get('results'), serializer.data)
+        self.assertEqual(response.data.get('results').get('products'), serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_get_mice_with_filters(self):
@@ -324,7 +324,7 @@ class ProductViewSetTests(APITestCase):
         )
         products = Mouse.objects.filter(wireless=True)
         serializer = MouseSerializer(products, many=True)
-        self.assertEqual(response.data.get('results'), serializer.data)
+        self.assertEqual(response.data.get('results').get('products'), serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     # Phone tests
@@ -344,7 +344,7 @@ class ProductViewSetTests(APITestCase):
         )).order_by("-rank")
         serializer = PhoneSerializer(products, many=True)
         
-        self.assertEqual(response.data.get('results'), serializer.data)
+        self.assertEqual(response.data.get('results').get('products'), serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
     def test_get_phones_with_ordering(self):
@@ -358,7 +358,7 @@ class ProductViewSetTests(APITestCase):
         )
         products = Phone.objects.order_by('-price')
         serializer = PhoneSerializer(products, many=True)
-        self.assertEqual(response.data.get('results'), serializer.data)
+        self.assertEqual(response.data.get('results').get('products'), serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_get_phones_with_filters(self):
@@ -372,7 +372,7 @@ class ProductViewSetTests(APITestCase):
         )
         products = Phone.objects.filter(os_version='Android 12')
         serializer = PhoneSerializer(products, many=True)
-        self.assertEqual(response.data.get('results'), serializer.data)
+        self.assertEqual(response.data.get('results').get('products'), serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
     # Speakers test
@@ -392,7 +392,7 @@ class ProductViewSetTests(APITestCase):
         )).order_by("-rank")
         serializer = SpeakerSerializer(products, many=True)
         
-        self.assertEqual(response.data.get('results'), serializer.data)
+        self.assertEqual(response.data.get('results').get('products'), serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
     
     def test_get_speakers_with_ordering(self):
@@ -406,7 +406,7 @@ class ProductViewSetTests(APITestCase):
         )
         products = Speaker.objects.order_by('price')
         serializer = SpeakerSerializer(products, many=True)
-        self.assertEqual(response.data.get('results'), serializer.data)
+        self.assertEqual(response.data.get('results').get('products'), serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_get_speakers_with_filters(self):
@@ -420,7 +420,7 @@ class ProductViewSetTests(APITestCase):
         )
         products = Speaker.objects.filter(portable=True)
         serializer = SpeakerSerializer(products, many=True)
-        self.assertEqual(response.data.get('results'), serializer.data)
+        self.assertEqual(response.data.get('results').get('products'), serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     # Television test
@@ -440,7 +440,7 @@ class ProductViewSetTests(APITestCase):
         )).order_by("-rank")
         serializer = TelevisionSerializer(products, many=True)
         
-        self.assertEqual(response.data.get('results'), serializer.data)
+        self.assertEqual(response.data.get('results').get('products'), serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
     def test_get_televisions_with_ordering(self):
@@ -454,7 +454,7 @@ class ProductViewSetTests(APITestCase):
         )
         products = Television.objects.order_by('-screen_size')
         serializer = TelevisionSerializer(products, many=True)
-        self.assertEqual(response.data.get('results'), serializer.data)
+        self.assertEqual(response.data.get('results').get('products'), serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_get_televisions_with_filters(self):
@@ -468,7 +468,7 @@ class ProductViewSetTests(APITestCase):
         )
         products = Television.objects.filter(panel_type='OLED')
         serializer = TelevisionSerializer(products, many=True)
-        self.assertEqual(response.data.get('results'), serializer.data)
+        self.assertEqual(response.data.get('results').get('products'), serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
     
     
@@ -498,7 +498,7 @@ class ProductViewSetTests(APITestCase):
             normalization=4,
         )).order_by("-rank")
         serializer = TelevisionSerializer(products, many=True)
-        self.assertEqual(response.data.get('results'), serializer.data)
+        self.assertEqual(response.data.get('results').get('products'), serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_get_televisions_with_filters(self):
@@ -520,5 +520,5 @@ class ProductViewSetTests(APITestCase):
             normalization=4,
         )).order_by("-rank")
         serializer = TelevisionSerializer(products, many=True)
-        self.assertEqual(response.data.get('results'), serializer.data)
+        self.assertEqual(response.data.get('results').get('products'), serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
