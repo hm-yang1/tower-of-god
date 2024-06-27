@@ -74,7 +74,6 @@ class ProductViewSet(ReadOnlyModelViewSet):
             raise ValidationError("search query not found")
 
         category_string = str(self.request.query_params.get('category', ""))
-        print('Search string: ' + "category_string: " + category_string)
 
         # if the category params is given, use that, else do fuzzy search for category
         if category_string:
