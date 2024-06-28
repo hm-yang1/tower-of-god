@@ -1,11 +1,12 @@
 import re
 import time
+from turtle import pos
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.relative_locator import locate_with
 from multiprocessing.pool import ThreadPool
 from rapidfuzz import fuzz
 from random import sample
-from .Scrapper import Scrapper
+from scrapper.Scrapper import Scrapper
 
 class reddit_scrapper(Scrapper):
     # Scrapper to scrape reddit comments of products to get general product sentiment
@@ -23,28 +24,28 @@ class reddit_scrapper(Scrapper):
     def get_methods(self) -> list:
         # return list of methods to call to get data for various categories
         return [
-            self.update_products,
+            self.update_product,
         ]
-    
-    def update_products(self, products) -> list:
-        pool = ThreadPool(6)
+        
+    def update_products(self, products:list) -> list:
+        pool = ThreadPool(5)
         results = pool.map(self.update_product, products)
-        products = list(results)
         pool.close()
-        
-        for product in products:
-            print(product.__str__())
-        
-        return products
+        return results
     
     def update_product(self, product):
-        urls = self.get_posts(product)
-        print('reddit_scrapper: got urls')
+        if product.get_reddit_comments():
+            return product
         
-        for url in urls:
-            comments = self.parse_post(url)
-            product.add_reddit_comments(comments)
-            
+        urls = self.get_posts(product)
+        print('reddit_scrapper: got urls' + str(urls))
+        
+        pool = ThreadPool(5)
+        results = pool.map(self.parse_post, urls)
+        for result in results:
+            product.add_reddit_comments(result)
+        
+        pool.close()
         return product
         
     def get_posts(self, product) -> list[str]:
@@ -52,7 +53,7 @@ class reddit_scrapper(Scrapper):
         driver = self.start(search_url)
         
         # Wait. Don't be too fast like a bot.
-        driver.implicitly_wait(60)
+        driver.implicitly_wait(10)
         time.sleep(10)
         
         # Get posts about product
@@ -75,36 +76,47 @@ class reddit_scrapper(Scrapper):
     
     def parse_post(self, url:str) -> list[str]:
         driver = self.start(url)
-        driver.implicitly_wait(60)
-        time.sleep(10)
+        driver.implicitly_wait(10)
         comment_list = []
         
         # Parse title and post words
-        title = driver.find_element(By.TAG_NAME, 'h1')
-        post_content = driver.find_element(locate_with(By.CLASS_NAME, 'text-neutral-content').below(title))
-        comment_list.append(title.text)
-        comment_list.append(post_content.text)
+        try:
+            post = driver.find_element(By.TAG_NAME, 'shreddit-post')
+            title = post.find_element(By.TAG_NAME, 'h1')
+            post_content = post.find_element(By.CLASS_NAME, 'text-neutral-content')
+            comment_list.append(title.text)
+            comment_list.append(post_content.text)
+        except Exception as e:
+            print(e)
         
         # Parse comments
-        comments_wrapper = driver.find_element(By.ID, 'comment-tree')
-        comments = comments_wrapper.find_elements(By.XPATH, 'shreddit-comment[@depth="0"]')
-        
-        if len(comments) < 20: 
-            # Allow more comments
-            comments = comments_wrapper.find_elements(By.TAG_NAME, 'shreddit-comment')
-        
-        for comment in comments:
-            # Check if comment deleted
-            is_deleted = comment.get_attribute('is-comment-deleted')
-            if is_deleted == 'true': continue
+        try:
+            comments_wrapper = driver.find_element(By.ID, 'comment-tree')
+            comments = comments_wrapper.find_elements(By.XPATH, 'shreddit-comment[@depth="0"]')
             
-            comment_string = comment.find_element(By.ID, '-post-rtjson-content').text.replace('\n', '. ')
+            if len(comments) < 20: 
+                # Allow more comments
+                comments = comments_wrapper.find_elements(By.TAG_NAME, 'shreddit-comment')
+                            
+            for comment in comments:
+                driver.execute_script("arguments[0].scrollIntoView();", comment)
+                driver.implicitly_wait(5)
+                # Check if comment deleted
+                is_deleted = comment.get_attribute('is-comment-deleted')
+                if is_deleted == 'true': continue
+                
+                comment_paragraphs = comment.find_elements(By.TAG_NAME, 'p')
+                comment_string = ''
+                for p in comment_paragraphs:
+                    comment_string += p.text
+                
+                # Reddit comments below 5 words kinda not worth
+                if len(comment_string.split()) < 6: continue
+                
+                comment_list.append(comment_string)
+        except Exception as e:
+            print(e)
             
-            # Reddit comments below 5 words kinda not worth
-            if len(comment_string.split()) < 6: continue
-            
-            comment_list.append(comment_string)
-        
         self.end(driver)
         return comment_list
             
@@ -113,8 +125,6 @@ def main():
     Product = scrapper.categories['mouse']
     products = [
         Product(name='Razer Viper V2 pro'), 
-        Product(name='Pulsar X2V2'), 
-        Product(name='Fantech Aria XD7'),
     ]
     products = scrapper.update_products(products)
     print(str(products))

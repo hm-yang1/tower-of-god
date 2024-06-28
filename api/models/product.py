@@ -122,6 +122,9 @@ class Product(models.Model):
     
     def get_reviews(self) -> list:
         return self.reviews
+    
+    def get_reddit_comments(self) -> bool:
+        return len(self.reddit_comments) > 20
         
     def remove_duplicates(self):
         self.pros = list(set(self.pros))

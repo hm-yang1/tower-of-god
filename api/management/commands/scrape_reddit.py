@@ -1,3 +1,4 @@
+from multiprocessing.pool import ThreadPool
 from typing import Any
 from .scrape import Command
 from scrapper.Scrapper import Scrapper
@@ -7,17 +8,27 @@ class Command(Command):
     help = "Scrape reddit comments"
     
     def handle(self, *args: Any, **options: Any) -> str | None:
-        scrapper = Scrapper()
-        reddit = reddit_scrapper()
+        scrapper = reddit_scrapper()
         product_categories = scrapper.categories.values()
         
+        # pool = ThreadPool(len(product_categories))
+        # curried_func = lambda x: self.helper(x, scrapper)
+        # pool.map(curried_func, product_categories)
+        # pool.close()
+        
         for Product in product_categories:
-            print('scrapping: ' + str(Product))
-            for product in Product.objects.all():
-                # Get reddit comments
-                reddit.update_product(product)
-                
-                print(product)
-                
-                product.save()
+            self.helper(Product, scrapper)
+        
         return
+    
+    def helper(self, Product, scrapper):
+        products = Product.objects.all()
+        for product in products:
+            try:
+                scrapper.update_product(product)
+            except Exception as e:
+                print(product.get_name())
+                print(e)
+            product.save()
+        
+        return product
