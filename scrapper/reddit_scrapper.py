@@ -1,6 +1,5 @@
 import re
 import time
-from turtle import pos
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.relative_locator import locate_with
 from multiprocessing.pool import ThreadPool
