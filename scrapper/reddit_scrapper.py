@@ -36,16 +36,19 @@ class reddit_scrapper(Scrapper):
         if product.get_reddit_comments():
             return product
         
-        urls = self.get_posts(product)
-        print('reddit_scrapper: got urls' + str(urls))
-        
-        pool = ThreadPool(5)
-        results = pool.map(self.parse_post, urls)
-        for result in results:
-            product.add_reddit_comments(result)
-        
-        pool.close()
-        return product
+        try:
+            urls = self.get_posts(product)
+            print('reddit_scrapper: got urls' + str(urls))
+            
+            pool = ThreadPool(5)
+            results = pool.map(self.parse_post, urls)
+            for result in results:
+                product.add_reddit_comments(result)
+        except Exception as e:
+            print(e)
+        finally:
+            pool.close()
+            return product
         
     def get_posts(self, product) -> list[str]:
         search_url = self.website + '/search/?q=' + product.get_name().lower() + '&type=link&t=year'

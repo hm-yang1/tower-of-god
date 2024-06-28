@@ -23,12 +23,8 @@ class Command(Command):
     
     def helper(self, Product, scrapper):
         products = Product.objects.all()
-        for product in products:
-            try:
-                scrapper.update_product(product)
-            except Exception as e:
-                print(product.get_name())
-                print(e)
-            product.save()
+        results = scrapper.update_products(products)
+
+        for result in results:
+            result.save()
         
-        return product
