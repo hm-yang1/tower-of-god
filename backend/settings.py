@@ -110,7 +110,7 @@ AUTH_USER_MODEL = 'api.User'
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
-    'towerofgod-eight.vercel.app',
+    'https://towerofgod-eight.vercel.app',
 ]
 
 CORS_ALLOW_HEADERS = [
