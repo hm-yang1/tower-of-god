@@ -136,7 +136,7 @@ class ProductViewSet(ReadOnlyModelViewSet):
         filter_info = {}
         filter_fields = model.get_specific_filters()
         for field in filter_fields:
-            values = list(model.objects.values_list(field).distinct())
+            values = list(model.objects.values_list(field, flat=True).distinct())
             filter_info[str(field)] = values
         
         # Pagination
