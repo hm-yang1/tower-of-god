@@ -27,7 +27,7 @@ class reddit_scrapper(Scrapper):
         ]
         
     def update_products(self, products:list) -> list:
-        pool = ThreadPool(5)
+        pool = ThreadPool(7)
         results = pool.map(self.update_product, products)
         pool.close()
         return results
@@ -36,11 +36,12 @@ class reddit_scrapper(Scrapper):
         if product.get_reddit_comments():
             return product
         
+        pool = ThreadPool(7)
+        
         try:
             urls = self.get_posts(product)
             print('reddit_scrapper: got urls' + str(urls))
             
-            pool = ThreadPool(5)
             results = pool.map(self.parse_post, urls)
             for result in results:
                 product.add_reddit_comments(result)
@@ -48,6 +49,9 @@ class reddit_scrapper(Scrapper):
             print(e)
         finally:
             pool.close()
+
+            # Saving here, otherwise take too long, something happens and scrapped comments lost
+            product.save()
             return product
         
     def get_posts(self, product) -> list[str]:
@@ -55,8 +59,8 @@ class reddit_scrapper(Scrapper):
         driver = self.start(search_url)
         
         # Wait. Don't be too fast like a bot.
-        driver.implicitly_wait(10)
         time.sleep(10)
+        driver.implicitly_wait(10)
         
         # Get posts about product
         posts = driver.find_elements(By.CSS_SELECTOR, '[data-testid="post-title"]')
@@ -70,20 +74,22 @@ class reddit_scrapper(Scrapper):
         urls = list(filter(filter_method, urls))
         
         # Limit posts, no point scrapping too many posts
-        if len(urls) > 10:
-            urls = urls[:10]
+        if len(urls) > 3:
+            urls = urls[:5]
         
         self.end(driver)
         return urls
     
     def parse_post(self, url:str) -> list[str]:
         driver = self.start(url)
-        driver.implicitly_wait(10)
+        time.sleep(45)
+        driver.implicitly_wait(60)
         comment_list = []
         
         # Parse title and post words
         try:
             post = driver.find_element(By.TAG_NAME, 'shreddit-post')
+            driver.execute_script("arguments[0].scrollIntoView();", post)
             title = post.find_element(By.TAG_NAME, 'h1')
             post_content = post.find_element(By.CLASS_NAME, 'text-neutral-content')
             comment_list.append(title.text)
@@ -91,6 +97,9 @@ class reddit_scrapper(Scrapper):
         except Exception as e:
             print(e)
         
+        time.sleep(45)
+        driver.implicitly_wait(60)
+
         # Parse comments
         try:
             comments_wrapper = driver.find_element(By.ID, 'comment-tree')

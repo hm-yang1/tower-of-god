@@ -25,6 +25,8 @@ class Command(Command):
         products = Product.objects.all()
         results = scrapper.update_products(products)
 
-        for result in results:
-            result.save()
+        # for result in results:
+        #     print(result)
+        #     result.save()
+        #     print('success')
         
