@@ -71,26 +71,6 @@ class LogoutView(APIView):
             return Response({'success': 'Successfully logged out'}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"message": "Invalid or expired token.", "error": str(e)}, status=status.HTTP_401_UNAUTHORIZED)
-        
-class RefreshTokenView(APIView):
-    permission_classes = [permissions.AllowAny]
-    
-    def post(self, request):
-        refresh_token = request.headers.get('refresh-token')
-
-        if not refresh_token:
-            return Response({'error': 'Refresh token is required'}, status=status.HTTP_400_BAD_REQUEST)
-        try:
-            token = RefreshToken(refresh_token)
-            access_token = token.access_token
-            
-            return Response({
-                'refresh': str(token),
-                'access': str(access_token),
-            }, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({"message": "Invalid or expired token.", "error": str(e)}, status=status.HTTP_401_UNAUTHORIZED)
-        
                 
 class ProfileView(APIView):
     pass
