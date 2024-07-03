@@ -95,8 +95,7 @@ class GoogleLoginView(APIView):
         
     def post(self, request, *args, **kwargs):
         strategy = load_strategy(request)
-        # backend = load_backend(strategy, 'google-oauth2', redirect_uri=None)
-        backend = GoogleOAuth2()
+        backend = GoogleOAuth2(strategy)
         
         google_code = request.data.get('code', None)
         if not google_code:
