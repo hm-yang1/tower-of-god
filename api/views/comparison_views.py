@@ -20,7 +20,7 @@ class ComparisonViewSet(ReadOnlyModelViewSet):
     # Categories of products
     # placed here for convience, not sure if this is the most correct place to put this
     categories = {
-        'earphone': [Earbuds, EarbudSerializer],
+        'earphones': [Earbuds, EarbudSerializer],
         'keyboard': [Keyboard, KeyboardSerializer],
         'laptop': [Laptop, LaptopSerializer],
         'monitor': [Monitor, MonitorSerializer],
