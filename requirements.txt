@@ -10,8 +10,10 @@ psycopg2-binary==2.9.9
 pillow==10.3.0
 
 # Oauth
+drf-social-oauth2==2.3.0
 social-auth-app-django==5.4.1
 social-auth-core==4.5.4
+requests-oauthlib==2.0.0
 
 # Azure
 azure-core==1.30.2
