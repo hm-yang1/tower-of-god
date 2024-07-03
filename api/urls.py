@@ -2,9 +2,8 @@ from posixpath import basename
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-
 from .views.wishlist_views import WishlistViewSet
-from .views.user_views import LoginView, LogoutView, RegisterView
+from .views.user_views import LoginView, LogoutView, RegisterView, GoogleLoginView
 from .views.product_views import ProductViewSet
 from .views.comparison_views import ComparisonViewSet
 from rest_framework_simplejwt.views import TokenRefreshView
@@ -22,6 +21,9 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(), name='logout'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     
-    # Get URLs
+    # Oauth URLs
+    path('auth/google/', GoogleLoginView.as_view(), name='google_login'),
+
+    # Include viewset URLs
     path('', include(router.urls)),
 ]

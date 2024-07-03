@@ -11,12 +11,12 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 import os
+from re import T
 import dj_database_url
 from django.conf import settings
 from dotenv import load_dotenv
 from pathlib import Path
 from datetime import timedelta
-
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -40,18 +40,32 @@ INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
+    'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
     'api',
     
+    # DRF
     'rest_framework',
     'django_filters',
     'corsheaders',
+    
+    # Simple jwt
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
+    
+    # OAuth
+    'oauth2_provider',
+    'social_django',
 ]
 
+AUTHENTICATION_BACKENDS = [
+    'social_core.backends.google.GoogleOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+# DRF settings
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -63,12 +77,18 @@ REST_FRAMEWORK = {
     'TEST_REQUEST_DEFAULT_FORMAT': 'json',
 }
 
+# Google Oauth settings
+GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', None)
+GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET', None)
+CALLBACK_URL_ON_GOOGLE = os.environ.get('CALLBACK_URL_ON_GOOGLE', None)
+GOOGLE_LOGIN_URL = os.environ.get('GOOGLE_LOGIN_URL', None)
+
 # JWT settings
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
     "ROTATE_REFRESH_TOKENS": False,
-    "BLACKLIST_AFTER_ROTATION": False,
+    "BLACKLIST_AFTER_ROTATION": True,
     "UPDATE_LAST_LOGIN": False,
 
     "ALGORITHM": "HS256",
@@ -136,14 +156,6 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'backend.urls'
 
-# Email settings
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.getenv('EMAIL')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_PASSWORD')
-
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -155,6 +167,10 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                
+                # OAuth
+                'social_django.context_processors.backends',
+                'social_django.context_processors.login_redirect',
             ],
         },
     },
