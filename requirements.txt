@@ -9,6 +9,10 @@ djangorestframework-simplejwt==5.3.1
 psycopg2-binary==2.9.9
 pillow==10.3.0
 
+# Oauth
+social-auth-app-django==5.4.1
+social-auth-core==4.5.4
+
 # Azure
 azure-core==1.30.2
 azure-storage-blob==12.20.0
