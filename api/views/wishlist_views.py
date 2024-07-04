@@ -9,6 +9,7 @@ from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.exceptions import NotAcceptable
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from ..models.monitor import Monitor
 from ..models.speaker import Speaker
@@ -36,6 +37,10 @@ class WishlistViewSet(ModelViewSet):
         return queryset
     
     def create(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        if len(queryset) > 100:
+            raise NotAcceptable('Do u really need more than 100 items in wishlist?') 
+        
         product_category = request.data.get('product_category')
         object_id = request.data.get('object_id')
         
