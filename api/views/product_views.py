@@ -71,7 +71,8 @@ class ProductViewSet(ReadOnlyModelViewSet):
         print('Search string: ' + search_string)
         
         if not search_string or search_string=='None':
-            raise ValidationError("search query not found")
+            search_string = "mouse"
+            # raise ValidationError("search query not found")
 
         category_string = str(self.request.query_params.get('category', ""))
 
