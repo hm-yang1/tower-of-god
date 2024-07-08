@@ -3,6 +3,7 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views.wishlist_views import WishlistViewSet
+from .views.search_history_views import SearchHistoryViewSet
 from .views.user_views import LoginView, LogoutView, RegisterView, GoogleLoginView
 from .views.product_views import ProductViewSet
 from .views.comparison_views import ComparisonViewSet
@@ -13,6 +14,7 @@ router = DefaultRouter()
 router.register(r'products', ProductViewSet, basename='product')
 router.register(r'compare', ComparisonViewSet, basename='compare')
 router.register(r'wishlist', WishlistViewSet, basename='wishlist')
+router.register(r'search_history', SearchHistoryViewSet, basename='search_history')
 
 urlpatterns = [
     # Authentication Urls

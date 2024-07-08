@@ -14,9 +14,8 @@ from .monitor import Monitor, MonitorSerializer
 from .speaker import Speaker, SpeakerSerializer
 from .television import Television, TelevisionSerializer
 
-class Wishlist(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='search_histories')
-    
+# Abstract wishlist to promote code reuse
+class AbstractWishlist(models.Model):    
     # Using content types to identify product
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
@@ -31,7 +30,10 @@ class Wishlist(models.Model):
         result += '\n' + str(self.datetime)
         return result
     
-class WishlistSerializer(serializers.ModelSerializer):
+    class Meta:
+        abstract = True
+        
+class AbstractWishlistSerializer(serializers.ModelSerializer):
     # Serializes user
     user = UserSerializer()
     
@@ -39,7 +41,7 @@ class WishlistSerializer(serializers.ModelSerializer):
     content_object = serializers.SerializerMethodField()
     
     class Meta:
-        model = Wishlist
+        abstract = True
         fields = '__all__'
         
     def get_content_object(self, obj):
@@ -67,3 +69,11 @@ class WishlistSerializer(serializers.ModelSerializer):
 
         serializer = serializer_class(instance=obj.content_object, context=self.context)
         return serializer.data
+    
+# Actual wishlist
+class Wishlist(AbstractWishlist):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='wishlist')
+    
+class WishlistSerializer(AbstractWishlistSerializer):
+    class Meta(AbstractWishlistSerializer.Meta):
+        model = Wishlist
