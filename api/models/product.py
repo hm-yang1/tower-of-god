@@ -102,8 +102,7 @@ class Product(models.Model):
     def add_summary(self, summary:str):
         if summary.isspace(): return
         if len(summary.split()) > 1000: return
-        if self.summary == '':
-            self.summary += summary
+        self.summary = summary
     
     def add_score(self, score:int):
         if score > 10 or score < 0: return
@@ -112,8 +111,7 @@ class Product(models.Model):
     def add_justification(self, justification:str):
         if justification.isspace(): return
         if len(justification.split()) > 100: return
-        if self.justification == '':
-            self.justification += justification
+        self.justification = justification
         
     def add_price(self, price: float):
         if self.price: return

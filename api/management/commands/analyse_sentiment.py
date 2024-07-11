@@ -1,7 +1,7 @@
 from typing import Any
 from multiprocessing.pool import ThreadPool
 from django.core.management.base import BaseCommand
-from ....ai.gemini import Gemini
+from ai.gemini import Gemini
 from scrapper.Scrapper import Scrapper
 
 

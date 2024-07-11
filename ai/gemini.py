@@ -18,7 +18,7 @@ class Gemini:
     
     sentiment_query = '''Analyse the sentiment about an electronic product: {name} from the comments below. 
         Give a score out of 10, 10 for most positive. Also give 50 word justification of the score. 
-        Format the answer like score:"8"; description:"....."
+        Format the answer like score:8; description:"....."
         Comments: {comments}'''
         
     summerise_query = '''Summerise the reviews about this electronic product: {name}. 
@@ -38,7 +38,7 @@ class Gemini:
         name = product.get_name()
         comments = product.get_reddit_comments()
         
-        if len(comments) < 5 or len(product.get_justification().split()) > 20:
+        if len(comments) < 5 or product.score is not None:
             return product
         
         query = self.sentiment_query.format(name=name, comments=str(comments))
@@ -50,13 +50,14 @@ class Gemini:
                 candidate_count=1,
                 temperature=1.0)
             )
+            print(response.text)
             
             # Need wait to respect google request limits
             time.sleep(62)
             
-            content = re.findall(r'"(.*?)"', response.text)
-            score = content[0]
-            justification = content[1]
+            content = response.text.split(';')
+            score = re.findall(r'\b(?:[1-9]|10)\b', content[0])[0]
+            justification = content[1].replace('description:', '').replace('"', '')
             product.add_score(int(score))
             product.add_justification(justification)
         
@@ -71,7 +72,7 @@ class Gemini:
         name = product.get_name()
         description = product.get_description()
         
-        if len(product.get_summary().split()) > 50: return product
+        if len(product.get_summary().split()) > 40: return product
         
         query = self.summerise_query.format(name=name, reviews=description)
         
@@ -86,8 +87,7 @@ class Gemini:
             # Need wait to respect google request limits
             time.sleep(62)
             
-            content = response.text.split(':')
-            summary = content[1].replace('"', '')
+            summary = response.text.replace('Summary: ', '')           
             product.add_summary(summary)
         
         except Exception as e:
@@ -222,31 +222,31 @@ def main():
     # product = ai.analyse_product(product)
     # print(product)
     
-    reviews = '''
-        The OnePlus 12 is an off-the-beaten-path flagship that goes spec for spec against its top rivals. Moreover, its 5,000mAh battery charges faster than most: It goes from 0% to 100% in just 38 minutes with the included 80W charger.
-        A top-tier processor, super-fast charging, and a reasonable price make the OnePlus 12 an ideal Android phone for power users who don't want to spend too much.
-        THE BOTTOM LINE
-        With an impressive display, long battery life, speedy charging, and premium performance, the OnePlus 12 offers most of the features found on other flagship phones for a more affordable price.
-        The OnePlus 12 (starting at $799.99) carries over many of the things we liked about last year's 11 5G and Open and improves upon them across the board. Its fast and vivid display, extra-long battery life, rapid wireless charging, and blazing performance make it a compelling alternative to flagship Android phones like the $899 Google Pixel 8 Pro and the $999 Samsung Galaxy S24+. The OnePlus 12 is well worth considering if you're looking to spend $100 to $200 less than either of those handsets, but it's not a clear-cut winner as it falls behind slightly in a few key areas.
-        With loads of power, epic battery life, lightning-fast charging, and a solid camera, the OnePlus 12 almost has it all—at a lower price than the competition. That said, both the Galaxy S24 and the Pixel 8 have even better cameras, higher IP ratings, faster 5G, longer support commitments, and more AI-based features. If you place a high value on any or all of those features, you should consider spending more to get them, especially since Google and Samsung now offer such long-term support. Still, the OnePlus 12 covers far more than the basics, making it easy to recommend if you're looking for a flagship phone that's closer to a midrange price.
-        The OnePlus 12 returns to the OnePlus roots as a flagship killer. This is a phone with excellent performance and the important features to challenge the expensive, premiere flagship phones, at a lower price. 
-        ✅ You want a phone that looks cool: Are you bored with metal slabs? So is OnePlus, and the OnePlus 12 in either emerald green or a sparkly black finish will stand out from the crowd in the best way. 
-        Design: I wish it were more durable, but I can't ask for the OnePlus 12 to be more beautiful, because it's truly a stunning phone that stands out from the pack the way formal attire stands out from a crowd in cocktail dress. 
-        ✅ You need long battery in a hurry: The OnePlus 12 doesn't just have better battery life than the competition, it also charges faster. It even comes with a fast charger in the box, a rarity these days. 
-        Display: OnePlus 12 takes on the best phones you can buy with a big, bright screen that is super-sharp, even more sharp than the iPhone 15 Pro Max. It even keeps the curve that Samsung abandoned, and it looks all the better for it. 
-        If you're considering the OnePlus 12, you should buy it, because OnePlus knows its audience well, and this phone was made for your needs. It's the coolest-looking phone in a long time, maybe ever, while others are boring metal slabs. You'll get better battery life, faster charging, and a brighter screen, all on a phone that costs hundreds less than the competition's Ultra and Pro models. OnePlus makes some sacrifices, but they might not matter to you, and its winning design plus no-nonsense software makes it the coolest smartphone you can buy at any price.
-        The OnePlus 12 is cool, there is no doubt about it. It looks gorgeous, and OnePlus has somehow managed to set itself apart from the slew of slabs that clutter store shelves with one of the sweetest color options I've ever seen on a phone, along with a design that is uncompromising and polished. 
-        Just like the coolest people, the OnePlus 12 is fun and flashy and hides its weaknesses where you can't see them. It's the best player in a scoring position, but it can't play every role on the field. 
-        The OnePlus 12 tries to play the smartphone game as the so-called 'flagship killer,' which is a phone that costs much less than the best Samsung Galaxy or best Apple iPhone, but still gives you the best features of those more popular handsets. 
-        In many respects, it's victorious, especially when you compare the OnePlus 12 to competitor phones that actually cost the same. If the OnePlus 12 is almost good enough to take on the Galaxy S24 Ultra, it's more than enough to challenge the Galaxy S24, which is a bit more expensive. If the Pixel 8 Pro has a tough new competitor, the Pixel 8, at the same price, is no competition at all for the OnePlus 12.
+    # reviews = '''
+    #     The OnePlus 12 is an off-the-beaten-path flagship that goes spec for spec against its top rivals. Moreover, its 5,000mAh battery charges faster than most: It goes from 0% to 100% in just 38 minutes with the included 80W charger.
+    #     A top-tier processor, super-fast charging, and a reasonable price make the OnePlus 12 an ideal Android phone for power users who don't want to spend too much.
+    #     THE BOTTOM LINE
+    #     With an impressive display, long battery life, speedy charging, and premium performance, the OnePlus 12 offers most of the features found on other flagship phones for a more affordable price.
+    #     The OnePlus 12 (starting at $799.99) carries over many of the things we liked about last year's 11 5G and Open and improves upon them across the board. Its fast and vivid display, extra-long battery life, rapid wireless charging, and blazing performance make it a compelling alternative to flagship Android phones like the $899 Google Pixel 8 Pro and the $999 Samsung Galaxy S24+. The OnePlus 12 is well worth considering if you're looking to spend $100 to $200 less than either of those handsets, but it's not a clear-cut winner as it falls behind slightly in a few key areas.
+    #     With loads of power, epic battery life, lightning-fast charging, and a solid camera, the OnePlus 12 almost has it all—at a lower price than the competition. That said, both the Galaxy S24 and the Pixel 8 have even better cameras, higher IP ratings, faster 5G, longer support commitments, and more AI-based features. If you place a high value on any or all of those features, you should consider spending more to get them, especially since Google and Samsung now offer such long-term support. Still, the OnePlus 12 covers far more than the basics, making it easy to recommend if you're looking for a flagship phone that's closer to a midrange price.
+    #     The OnePlus 12 returns to the OnePlus roots as a flagship killer. This is a phone with excellent performance and the important features to challenge the expensive, premiere flagship phones, at a lower price. 
+    #     ✅ You want a phone that looks cool: Are you bored with metal slabs? So is OnePlus, and the OnePlus 12 in either emerald green or a sparkly black finish will stand out from the crowd in the best way. 
+    #     Design: I wish it were more durable, but I can't ask for the OnePlus 12 to be more beautiful, because it's truly a stunning phone that stands out from the pack the way formal attire stands out from a crowd in cocktail dress. 
+    #     ✅ You need long battery in a hurry: The OnePlus 12 doesn't just have better battery life than the competition, it also charges faster. It even comes with a fast charger in the box, a rarity these days. 
+    #     Display: OnePlus 12 takes on the best phones you can buy with a big, bright screen that is super-sharp, even more sharp than the iPhone 15 Pro Max. It even keeps the curve that Samsung abandoned, and it looks all the better for it. 
+    #     If you're considering the OnePlus 12, you should buy it, because OnePlus knows its audience well, and this phone was made for your needs. It's the coolest-looking phone in a long time, maybe ever, while others are boring metal slabs. You'll get better battery life, faster charging, and a brighter screen, all on a phone that costs hundreds less than the competition's Ultra and Pro models. OnePlus makes some sacrifices, but they might not matter to you, and its winning design plus no-nonsense software makes it the coolest smartphone you can buy at any price.
+    #     The OnePlus 12 is cool, there is no doubt about it. It looks gorgeous, and OnePlus has somehow managed to set itself apart from the slew of slabs that clutter store shelves with one of the sweetest color options I've ever seen on a phone, along with a design that is uncompromising and polished. 
+    #     Just like the coolest people, the OnePlus 12 is fun and flashy and hides its weaknesses where you can't see them. It's the best player in a scoring position, but it can't play every role on the field. 
+    #     The OnePlus 12 tries to play the smartphone game as the so-called 'flagship killer,' which is a phone that costs much less than the best Samsung Galaxy or best Apple iPhone, but still gives you the best features of those more popular handsets. 
+    #     In many respects, it's victorious, especially when you compare the OnePlus 12 to competitor phones that actually cost the same. If the OnePlus 12 is almost good enough to take on the Galaxy S24 Ultra, it's more than enough to challenge the Galaxy S24, which is a bit more expensive. If the Pixel 8 Pro has a tough new competitor, the Pixel 8, at the same price, is no competition at all for the OnePlus 12.
 
-        The OnePlus 12 has amazing performance, good enough to go toe-to-toe with the latest iPhone 15 Pro in games and some productivity tasks. It has cameras that produce excellent images; in some cases these photos are more compelling than the Galaxy S24 Ultra and our other best camera phones. 
-        In other words, if you go for the OnePlus 12 instead of that other phone you were considering, you won't feel like you're missing out. You get top-level performance, amazing photography, and battery life that lasts for days. You also get some cool features you can't find elsewhere, like super-fast charging, and even an IR blaster that can change the channel on your TV. 
-        For the price, the OnePlus 12 is a stellar phone that exceeds expectations. If that makes you a little suspicious, you're right to raise an eyebrow. What's missing are some of the same aspects OnePlus has omitted before, but now these features may be more important than ever. 
-        For one thing, the OnePlus 12 isn't as durable as the Samsung Galaxy S24 Ultra or the iPhone 15 Pro, not even close. Between the iPhone 15 Pro's titanium frame and the new Gorilla Armor glass on the Galaxy Ultra, OnePlus won't stand up to abuse like its rivals.'''
-    product = Mouse(name='Oneplus 12', description=reviews)
-    ai.summarise_reviews(product)
-    print(product)
+    #     The OnePlus 12 has amazing performance, good enough to go toe-to-toe with the latest iPhone 15 Pro in games and some productivity tasks. It has cameras that produce excellent images; in some cases these photos are more compelling than the Galaxy S24 Ultra and our other best camera phones. 
+    #     In other words, if you go for the OnePlus 12 instead of that other phone you were considering, you won't feel like you're missing out. You get top-level performance, amazing photography, and battery life that lasts for days. You also get some cool features you can't find elsewhere, like super-fast charging, and even an IR blaster that can change the channel on your TV. 
+    #     For the price, the OnePlus 12 is a stellar phone that exceeds expectations. If that makes you a little suspicious, you're right to raise an eyebrow. What's missing are some of the same aspects OnePlus has omitted before, but now these features may be more important than ever. 
+    #     For one thing, the OnePlus 12 isn't as durable as the Samsung Galaxy S24 Ultra or the iPhone 15 Pro, not even close. Between the iPhone 15 Pro's titanium frame and the new Gorilla Armor glass on the Galaxy Ultra, OnePlus won't stand up to abuse like its rivals.'''
+    # product = Mouse(name='Oneplus 12', description=reviews)
+    # ai.summarise_reviews(product)
+    # print(product)
     
 if __name__ == "__main__":
     main()
