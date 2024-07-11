@@ -33,7 +33,7 @@ class reddit_scrapper(Scrapper):
         return results
     
     def update_product(self, product):
-        if product.get_reddit_comments():
+        if len(product.get_reddit_comments()) > 5:
             return product
         
         pool = ThreadPool(7)
@@ -45,6 +45,7 @@ class reddit_scrapper(Scrapper):
             results = pool.map(self.parse_post, urls)
             for result in results:
                 product.add_reddit_comments(result)
+                product.remove_duplicates()
         except Exception as e:
             print(e)
         finally:
@@ -74,8 +75,8 @@ class reddit_scrapper(Scrapper):
         urls = list(filter(filter_method, urls))
         
         # Limit posts, no point scrapping too many posts
-        if len(urls) > 3:
-            urls = urls[:5]
+        if len(urls) > 10:
+            urls = urls[:10]
         
         self.end(driver)
         return urls
