@@ -475,7 +475,21 @@ class ProductViewSetTests(APITestCase):
     ################ Incorrect Tests ################
     def test_no_search(self):
         response = self.client.get(reverse('product-list'),)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        
+        # Empty search defaults to return mouse
+        vector = SearchVector('name', 'brand', 'pros', weight='A')
+        vector += SearchVector('description', weight='C') 
+        vector += Mouse.get_vectors()
+        
+        products = Mouse.objects.annotate(rank=SearchRank(
+            vector, 
+            SearchQuery('mouse'),
+            normalization=4,
+        )).order_by("-rank")
+        serializer = MouseSerializer(products, many=True)
+        
+        self.assertEqual(response.data.get('results').get('products'), serializer.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         
     # No errors for invalid ordering or filtering fields
     # Want api to always return some result, so returns to queryset as usual

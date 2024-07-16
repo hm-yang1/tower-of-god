@@ -10,21 +10,24 @@ class Product(models.Model):
     name = models.CharField(max_length=255, unique=True)
     brand = models.CharField(max_length=255)
     
-    # Image reference to aws s3 bucket, needs testing
+    # Image reference to azure blob storage
     img = models.ImageField(max_length=1000, upload_to='products/', null=True)
     img_url = models.URLField(max_length=500, null=True, blank=True)
     
     price = models.FloatField(blank=True, null=True)
     review_date = models.DateField(blank=True, null=True)
     description = models.TextField(blank=True)
+    summary = models.TextField(blank=True)
+    
+    # Fields for sentiment analysis of reddit comments
     score = models.IntegerField(blank=True, null=True)
+    justification = models.TextField(blank=True)
+    
     pros = models.JSONField(default=list, blank=True)
     cons = models.JSONField(default=list, blank=True)
     reviews = models.JSONField(default=list, blank=True)
     reddit_comments = models.JSONField(default=list, blank=True)
-    
-    # Need to add function to fill in googable information, probably in scrapper
-    
+        
     class Meta:
         # Set this class as abstract
         abstract = True
@@ -34,8 +37,11 @@ class Product(models.Model):
         result += '\n' + self.brand
         result += '\n' + 'Price: ' + str(self.price)
         result += '\n' + 'Date: ' + str(self.review_date)
+        result += '\n' + 'Score: ' + str(self.score)
+        result += '\n' + self.justification
         result += '\n' + str(self.img_url)
         result += '\n' + self.description
+        result += '\n' + 'Summary: ' + self.summary
         result += '\n' + str(self.pros)
         result += '\n' + str(self.cons)
         result += '\n' + str(self.reddit_comments) + str(len(self.reddit_comments))
@@ -92,7 +98,21 @@ class Product(models.Model):
             self.description += des
             return
         self.description = self.description + "\n" + des
+        
+    def add_summary(self, summary:str):
+        if summary.isspace(): return
+        if len(summary.split()) > 1000: return
+        self.summary = summary
     
+    def add_score(self, score:int):
+        if score > 10 or score < 0: return
+        self.score = score
+        
+    def add_justification(self, justification:str):
+        if justification.isspace(): return
+        if len(justification.split()) > 100: return
+        self.justification = justification
+        
     def add_price(self, price: float):
         if self.price: return
         self.price = price
@@ -120,11 +140,20 @@ class Product(models.Model):
     def get_img(self):
         return self.img
     
+    def get_description(self) -> str:
+        return self.description
+    
+    def get_summary(self) -> str:
+        return self.summary
+    
+    def get_justification(self) -> str:
+        return self.justification
+    
     def get_reviews(self) -> list:
         return self.reviews
     
-    def get_reddit_comments(self) -> bool:
-        return len(self.reddit_comments) > 2
+    def get_reddit_comments(self):
+        return self.reddit_comments
         
     def remove_duplicates(self):
         self.pros = list(set(self.pros))
