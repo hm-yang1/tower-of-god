@@ -66,10 +66,15 @@ class Product(models.Model):
             'review_date': ['exact', 'gte', 'lte'],
         }
     
-    # For filter fields with specific results
+    # For filter fields with unique results
     @classmethod
     def get_specific_filters(cls) -> dict:
         return ['brand']
+    
+    # Get order fields for product
+    @classmethod
+    def get_orders(cls) -> list:
+        return ['price', 'review_date', 'score']
         
     def add_brand(self, name: str):
         self.brand = name
