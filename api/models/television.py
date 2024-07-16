@@ -29,7 +29,7 @@ class Television(Product):
         result.update(filter_fields)
         return result
     
-    # Get filter fields with specific results
+    # Get filter fields with unique results
     @classmethod
     def get_specific_filters(cls):
         result = super().get_specific_filters()
@@ -40,12 +40,16 @@ class Television(Product):
         result.extend(filter_fields)
         return result
     
+    # Get ordering fields
     @classmethod
     def get_orders(cls):
-        return [
+        result = super().get_orders()
+        order_fields = [
             'screen_size',
-            'screen_resolution',
+            'screen_resolution'
         ]
+        result.extend(order_fields)
+        return result
     
     def combine(self, product):
         super().combine(product)

@@ -59,7 +59,7 @@ class ProductViewSet(ReadOnlyModelViewSet):
     filterset_fields = {}
     
     # Ordering fields, extend after determining category
-    ordering_fields = ['price', 'review_date']
+    ordering_fields = []
         
     # Determines catergory through fuzzy search. Performs full text search in the product fields
     def get_queryset(self):
@@ -103,7 +103,7 @@ class ProductViewSet(ReadOnlyModelViewSet):
         print(self.filterset_fields)
         
         # Extend odering_fields
-        self.ordering_fields = self.ordering_fields + model.get_orders()
+        self.ordering_fields = model.get_orders()
         print(self.ordering_fields)
         
         # Full text search
@@ -132,13 +132,18 @@ class ProductViewSet(ReadOnlyModelViewSet):
         queryset = self.filter_queryset(self.get_queryset())
         model = queryset.model
         
-        # Additional info for filter fields in response
-        # Get values of filter fields
-        filter_info = {}
-        filter_fields = model.get_specific_filters()
-        for field in filter_fields:
+        # Info for filter fields
+        filter_info = model.get_filters()
+        
+        # Additional info for unique filter fields
+        unique_filter_info = {}
+        unique_filter_fields = model.get_specific_filters()
+        for field in unique_filter_fields:
             values = list(model.objects.values_list(field, flat=True).distinct())
-            filter_info[str(field)] = values
+            unique_filter_info[str(field)] = values
+        
+        # Info about ordering fields
+        order_fields = model.get_orders()
         
         # Pagination
         page = self.paginate_queryset(queryset)
@@ -148,6 +153,8 @@ class ProductViewSet(ReadOnlyModelViewSet):
             # Add aggregated data to response
             data = {
                 'filters': filter_info,
+                'unique_filters': unique_filter_info,
+                'orders': order_fields,
                 'products': serializer.data,
             }
             filter_info = {}
@@ -158,6 +165,7 @@ class ProductViewSet(ReadOnlyModelViewSet):
         # If no pagination
         data = {
             'filters': filter_info,
+            'orders': order_fields,
             'products': serializer.data,
         }
         filter_info = {}
