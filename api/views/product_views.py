@@ -71,17 +71,10 @@ class ProductViewSet(ReadOnlyModelViewSet):
         print('Search string: ' + search_string)
         
         if not search_string or search_string=='None':
+            # Empty search strign defaults to mouse
             search_string = "mouse"
-            # raise ValidationError("search query not found")
 
         category_string = str(self.request.query_params.get('category', ""))
-
-        '''
-        Earbuds/Headphones was supposed to be earphones, however fuzzy search does not work well on it
-        Added manual conversion to earbuds if earphones is queried as the category to keep the categories consistent
-        '''
-        if category_string == "earphones":
-            category_string = "earbuds"
 
         # if the category params is given, use that, else do fuzzy search for category
         if category_string:
