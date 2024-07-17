@@ -86,7 +86,7 @@ class Earbuds(Product):
         
     # No point creating new column, just adding this to every serialized product
     def get_category_display(self):
-        return 'earphones'
+        return 'earbuds'
     
     def add_type(self, earbuds: bool):
         if earbuds: 
