@@ -43,7 +43,8 @@ class ProductViewSet(ReadOnlyModelViewSet):
     # placed here for convience, not sure if this is the most correct place to put this
     categories = {
         'earbuds': [Earbuds, EarbudSerializer],
-        'headphone':[Earbuds, EarbudSerializer],
+        'earphones': [Earbuds, EarbudSerializer],
+        'headphones':[Earbuds, EarbudSerializer],
         'keyboard': [Keyboard, KeyboardSerializer],
         'laptop': [Laptop, LaptopSerializer],
         'monitor': [Monitor, MonitorSerializer],
