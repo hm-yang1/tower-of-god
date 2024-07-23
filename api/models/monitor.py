@@ -64,6 +64,9 @@ class Monitor(Product):
         
         return self
     
+    def get_category_display(self):
+        return 'monitor'
+
     def add_screen_size(self, screen_size: int):
         self.screen_size = screen_size
     
