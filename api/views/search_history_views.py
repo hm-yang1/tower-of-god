@@ -65,6 +65,14 @@ class SearchHistoryViewSet(ModelViewSet):
             product_instance = product.objects.get(id=object_id)
         except product.DoesNotExist:
             return Response({"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Get content type
+        content_type = ContentType.objects.get_for_model(product_instance)
+        
+        # Check if item already exist in wishlist
+        queryset = self.get_queryset()
+        if queryset.filter(content_type=content_type, object_id=object_id).exists():
+            return Response({'error': 'Item already exists in your wishlist'}, status=status.HTTP_409_CONFLICT)
         
         # Create a search history item
         history_item = SearchHistory.objects.create(
