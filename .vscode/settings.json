@@ -2,5 +2,6 @@
     "python.analysis.extraPaths": [
         "./api"
     ],
-    "python.analysis.autoImportCompletions": true
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.typeCheckingMode": "off"
 }

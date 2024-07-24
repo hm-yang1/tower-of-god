@@ -9,6 +9,7 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from rapidfuzz import process, fuzz, utils
+from ..category import Category
 from ..models.earbuds import Earbuds, EarbudSerializer
 from ..models.keyboard import Keyboard, KeyboardSerializer
 from ..models.laptop import Laptop, LaptopSerializer
@@ -40,19 +41,12 @@ class NullsAlwaysLastOrderingFilter(OrderingFilter):
 # Viewset to query all products
 class ProductViewSet(ReadOnlyModelViewSet):
     # Categories of products
-    # placed here for convience, not sure if this is the most correct place to put this
-    categories = {
+    categories = Category.get_categories()
+    categories.update({
         'earbuds': [Earbuds, EarbudSerializer],
-        'earphones': [Earbuds, EarbudSerializer],
         'headphones':[Earbuds, EarbudSerializer],
-        'keyboard': [Keyboard, KeyboardSerializer],
-        'laptop': [Laptop, LaptopSerializer],
-        'monitor': [Monitor, MonitorSerializer],
-        'mouse': [Mouse, MouseSerializer],
-        'phone': [Phone, PhoneSerializer],
-        'speaker': [Speaker, SpeakerSerializer],
-        'television': [Television, TelevisionSerializer],
-    }
+    })
+    
     
     filter_backends = [SearchFilter, DjangoFilterBackend, OrderingFilter, ]
     
