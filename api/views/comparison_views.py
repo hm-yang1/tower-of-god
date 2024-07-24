@@ -11,6 +11,7 @@ from ..models.mouse import Mouse, MouseSerializer
 from ..models.phone import Phone, PhoneSerializer
 from ..models.speaker import Speaker, SpeakerSerializer
 from ..models.television import Television, TelevisionSerializer
+from ..category import Category
 
 # Viewset for comparison page
 # Really similar to product views, just without the fuzzy search and filtering the fields
@@ -18,20 +19,7 @@ from ..models.television import Television, TelevisionSerializer
 
 class ComparisonViewSet(ReadOnlyModelViewSet):
     # Categories of products
-    # placed here for convience, not sure if this is the most correct place to put this
-    categories = {
-        'earphones': [Earbuds, EarbudSerializer],
-        'keyboard': [Keyboard, KeyboardSerializer],
-        'laptop': [Laptop, LaptopSerializer],
-        'monitor': [Monitor, MonitorSerializer],
-        'mouse': [Mouse, MouseSerializer],
-        'phone': [Phone, PhoneSerializer],
-        'speaker': [Speaker, SpeakerSerializer],
-        'television': [Television, TelevisionSerializer],
-    }
-    
-    # authentication_classes = [JWTAuthentication]
-    # permission_classes = [IsAuthenticated]
+    categories = Category.get_categories()
     
     filter_backends = [SearchFilter]
         
