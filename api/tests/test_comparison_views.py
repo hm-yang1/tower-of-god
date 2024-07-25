@@ -90,7 +90,7 @@ class ComparisonViewSetTests(APITestCase):
             reverse('compare-list'), 
             {
                 'q': q,
-                'category': 'earphone'
+                'category': 'earbuds'
             }
         )
         

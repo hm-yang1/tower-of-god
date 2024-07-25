@@ -24,7 +24,7 @@ class ComparisonViewSet(ReadOnlyModelViewSet):
     filter_backends = [SearchFilter]
         
     def get_queryset(self):
-        # Get cateogry from http request
+        # Get category from http request
         category_string = str(self.request.query_params.get('category', None))
         print(category_string)
     

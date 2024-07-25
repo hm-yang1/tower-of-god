@@ -79,8 +79,8 @@ class ProductViewSet(ReadOnlyModelViewSet):
             choices = list(self.categories.keys())
             
             # Scorers set to default ratio for now
-            print(process.extractOne(search_string, choices, scorer=fuzz.ratio, processor= utils.default_process))
-            category = process.extractOne(search_string, choices, scorer=fuzz.ratio, processor= utils.default_process)[0]
+            print(process.extractOne(search_string, choices, scorer=fuzz.token_ratio, processor= utils.default_process))
+            category = process.extractOne(search_string, choices, scorer=fuzz.token_ratio, processor= utils.default_process)[0]
                 
             # Remove category from search_string
             words = search_string.split()
@@ -118,7 +118,7 @@ class ProductViewSet(ReadOnlyModelViewSet):
             num_reviews=Coalesce(Func(F('reviews'), function='jsonb_array_length', output_field=IntegerField()), Value(0)),
             score_weight=Coalesce(F('score'), Value(0))
         ).annotate(
-            weighted_rank=F('rank') + F('num_reviews') * 0.1 + F('score_weight') * 0.3
+            weighted_rank=F('rank') + F('num_reviews') * 0.1 + F('score_weight') * 0.1
         ).order_by('-weighted_rank')
         return queryset
     
