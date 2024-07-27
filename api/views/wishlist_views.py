@@ -29,9 +29,6 @@ class WishlistViewSet(ModelViewSet):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     serializer_class = WishlistSerializer
-    
-    # No need pagination for wishlist
-    # pagination_class = None
         
     def get_queryset(self):
         user = self.request.user
