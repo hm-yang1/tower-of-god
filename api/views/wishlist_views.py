@@ -31,7 +31,7 @@ class WishlistViewSet(ModelViewSet):
     serializer_class = WishlistSerializer
     
     # No need pagination for wishlist
-    pagination_class = None
+    # pagination_class = None
         
     def get_queryset(self):
         user = self.request.user
