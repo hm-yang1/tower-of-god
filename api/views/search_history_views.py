@@ -26,7 +26,6 @@ class SearchHistoryViewSet(ModelViewSet):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     serializer_class = SearchHistorySerializer    
-    pagination_class = None
     
     def get_queryset(self):
         user = self.request.user
