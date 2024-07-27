@@ -28,9 +28,11 @@ from ..models.wishlist import Wishlist, WishlistSerializer
 class WishlistViewSet(ModelViewSet):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
-    
     serializer_class = WishlistSerializer
     
+    # No need pagination for wishlist
+    pagination_class = None
+        
     def get_queryset(self):
         user = self.request.user
         queryset = Wishlist.objects.filter(user = user).order_by('-datetime')        
