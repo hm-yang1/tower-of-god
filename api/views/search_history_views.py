@@ -25,8 +25,9 @@ from ..models.search_history import SearchHistory, SearchHistorySerializer
 class SearchHistoryViewSet(ModelViewSet):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
-    serializer_class = SearchHistorySerializer
-        
+    serializer_class = SearchHistorySerializer    
+    pagination_class = None
+    
     def get_queryset(self):
         user = self.request.user
         queryset = SearchHistory.objects.filter(user = user).order_by('-datetime')        
