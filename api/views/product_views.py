@@ -77,7 +77,6 @@ class ProductViewSet(ReadOnlyModelViewSet):
         else:
             # Fuzzy search to determine category
             choices = list(self.categories.keys())
-            choices.remove('earphones')
             
             # Scorers set to default ratio for now
             print(process.extractOne(search_string, choices, scorer=fuzz.token_set_ratio, processor= utils.default_process))
