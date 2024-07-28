@@ -45,6 +45,7 @@ class ProductViewSet(ReadOnlyModelViewSet):
     categories.update({
         'earbuds': [Earbuds, EarbudSerializer],
         'headphones':[Earbuds, EarbudSerializer],
+        'tv': [Television, TelevisionSerializer]
     })
     
     
