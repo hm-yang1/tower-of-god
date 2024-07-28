@@ -10,7 +10,6 @@ from .models.television import Television, TelevisionSerializer
 # Class for centralised location of categories of products
 class Category():
     categories = {
-        'earphones': [Earbuds, EarbudSerializer],
         'keyboard': [Keyboard, KeyboardSerializer],
         'laptop': [Laptop, LaptopSerializer],
         'monitor': [Monitor, MonitorSerializer],
@@ -18,6 +17,7 @@ class Category():
         'phone': [Phone, PhoneSerializer],
         'speaker': [Speaker, SpeakerSerializer],
         'television': [Television, TelevisionSerializer],
+        'earphones': [Earbuds, EarbudSerializer],
     }
     
     @classmethod
