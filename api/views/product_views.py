@@ -69,7 +69,7 @@ class ProductViewSet(ReadOnlyModelViewSet):
             # Empty search strign defaults to mouse
             search_string = "mouse"
 
-        category_string = str(self.request.query_params.get('category', None))
+        category_string = str(self.request.query_params.get('category', ''))
 
         # if the category params is given, use that, else do fuzzy search for category
         if category_string:
