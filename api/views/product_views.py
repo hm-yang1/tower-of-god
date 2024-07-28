@@ -44,8 +44,7 @@ class ProductViewSet(ReadOnlyModelViewSet):
     categories = Category.get_categories()
     categories.update({
         'earbuds': [Earbuds, EarbudSerializer],
-        'headphones':[Earbuds, EarbudSerializer],
-        'tv': [Television, TelevisionSerializer]
+        'tv': [Television, TelevisionSerializer],
     })
     
     
