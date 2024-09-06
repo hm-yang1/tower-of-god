@@ -52,5 +52,8 @@
 
 ## Scrapper
 - Selenium webdrivers that navigate thorugh review sites. Navigates through pre-determined path.
-- Used Selenium to interact with web elements. Much slower than if used BeautifulSoup4.
-- Some may longer work as websites change everyday. Will not fix.
+- Used Selenium to interact with web elements, otherwise would have used BS4 for speed
+- Some may no longer work as websites change everyday. Will not fix.
+
+## Frontend Repo
+- [React Frontend](https://github.com/Betahaxer/Tower-of-God-Frontend)
